@@ -3,25 +3,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'localstorage.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 LocalStorage localStorage = new LocalStorage();
 
-void main() => runApp(MainApp());
+void main() async {
+  runApp(MainApp());
+}
 
 class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-        theme: ThemeData(
-            primaryColor: Colors.white,
-            primaryColorDark: Colors.grey[300],
-            accentColor: Colors.orange,
-            inputDecorationTheme: new InputDecorationTheme(
-                labelStyle: new TextStyle(color: Colors.orange),
-                border: new UnderlineInputBorder(
-                    borderSide: new BorderSide(
-                        color: Colors.orange, style: BorderStyle.solid)))),
-        home: new PlayerListView());
+    return new PlayerListView();
   }
 }
 
@@ -32,10 +25,12 @@ class PlayerListView extends StatefulWidget {
 
 class PlayerListViewState extends State<PlayerListView> {
   BuildContext scaffoldContext;
+  SharedPreferences prefs;
   List<Map> _playerList = [];
   List<dynamic> _dataList = [];
 
-  bool _isLoading = false;
+  bool _isDarkTheme = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -45,6 +40,19 @@ class PlayerListViewState extends State<PlayerListView> {
   }
 
   _initList() async {
+
+    await SharedPreferences.getInstance().then((SharedPreferences sp) {
+      prefs = sp;
+      _isDarkTheme = prefs.getBool('darkTheme');
+      if (_isDarkTheme == null) {
+        print('Prefs not found');
+        setDarkTheme(false);
+      }
+      setState(() {
+        _isDarkTheme = prefs.getBool('darkTheme');
+      });
+    });
+
     try {
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
@@ -54,7 +62,7 @@ class PlayerListViewState extends State<PlayerListView> {
 
       if (_dataList != null) {
         for (Map player in _dataList) {
-          _fetchData(player['battletag']);
+          await _fetchData(player['battletag']);
         }
       }
     } catch (e) {
@@ -66,10 +74,54 @@ class PlayerListViewState extends State<PlayerListView> {
     });
   }
 
+  void setDarkTheme(bool value) {
+    setState(() {
+      _isDarkTheme = value;
+    });
+    prefs.setBool('darkTheme', value);
+  }
+
   @override
   Widget build(BuildContext context) {
+    return new MaterialApp(
+        title: 'OverWidget',
+        theme: _isDarkTheme
+            ? ThemeData(
+                brightness: Brightness.dark,
+                accentColor: Colors.red,
+              )
+            : ThemeData(
+                primaryColor: Colors.white,
+                primaryColorDark: Colors.grey[300],
+                accentColor: Colors.orange,
+                inputDecorationTheme: new InputDecorationTheme(
+                    labelStyle: new TextStyle(color: Colors.orange),
+                    border: new UnderlineInputBorder(
+                        borderSide: new BorderSide(
+                            color: Colors.orange, style: BorderStyle.solid)))),
+        home: buildHome());
+  }
+
+  Widget buildHome() {
     return new Scaffold(
-        appBar: new AppBar(title: new Text('OverWidget')),
+        appBar: new AppBar(title: new Text('OverWidget'), actions: <Widget>[
+          PopupMenuButton<String>(
+            onSelected: (String result) {
+              switch (result) {
+                case 'darkTheme':
+                  setDarkTheme(!_isDarkTheme);
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  CheckedPopupMenuItem(
+                    checked: _isDarkTheme,
+                    value: 'darkTheme',
+                    child: Text('Dark Theme'),
+                  )
+                ],
+          )
+        ]),
         body: _isLoading
             ? new Center(child: new CircularProgressIndicator())
             : new Builder(builder: (BuildContext context) {
@@ -102,10 +154,7 @@ class PlayerListViewState extends State<PlayerListView> {
         subtitle: new Text('Level $level\n${map["gamesWon"]} games won'),
         trailing: new Column(children: <Widget>[
           Container(
-            height: 48,
-            width: 48,
-            child: Image.network(map['ratingIcon'])
-          ),
+              height: 48, width: 48, child: Image.network(map['ratingIcon'])),
           Text('${map['rating']} SR')
         ]),
         isThreeLine: true,
@@ -135,7 +184,7 @@ class PlayerListViewState extends State<PlayerListView> {
 
   void _promptRemoveItem(int index) {
     showDialog(
-        context: context,
+        context: scaffoldContext,
         builder: (BuildContext context) {
           return new AlertDialog(
               title: new Text('Remove ${_playerList[index]["name"]}?'),
@@ -155,7 +204,7 @@ class PlayerListViewState extends State<PlayerListView> {
 
   void _promptAddItem() {
     showDialog(
-        context: context,
+        context: scaffoldContext,
         builder: (BuildContext context) {
           TextEditingController inputController = new TextEditingController();
 
@@ -163,20 +212,20 @@ class PlayerListViewState extends State<PlayerListView> {
               title: new Text('Add player'),
               content: new Theme(
                   data: new ThemeData(
+                    brightness: Theme.of(context).brightness,
                     primaryColor: Theme.of(context).accentColor,
                     primaryColorDark: Theme.of(context).accentColor,
+                    accentColor: Theme.of(context).accentColor
                   ),
                   child: new TextField(
-                    //autofocus: true,
-
+                    autofocus: true,
                     controller: inputController,
                     onSubmitted: (val) {
                       _addItem(val);
                       Navigator.of(context).pop();
                     },
                     decoration: new InputDecoration(
-                      labelText: 'BattleTag',
-                    ),
+                        labelText: 'Username', hintText: 'Battletag#1234'),
                   )),
               actions: <Widget>[
                 new FlatButton(
@@ -195,7 +244,7 @@ class PlayerListViewState extends State<PlayerListView> {
   void _promptWeb(int index) {
     Map profile = _dataList[index];
     showDialog(
-        context: context,
+        context: scaffoldContext,
         builder: (BuildContext context) {
           return new SimpleDialog(
               title: new Text('Open in Browser'),
