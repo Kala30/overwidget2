@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'localstorage.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 
 LocalStorage localStorage = new LocalStorage();
 
@@ -99,9 +100,17 @@ class PlayerListViewState extends State<PlayerListView> {
             width: 64,
             child: new Image.network(map["icon"], fit: BoxFit.contain)),
         subtitle: new Text('Level $level\n${map["gamesWon"]} games won'),
-        trailing: new Text('${map['rating']} SR'),
+        trailing: new Column(children: <Widget>[
+          Container(
+            height: 48,
+            width: 48,
+            child: Image.network(map['ratingIcon'])
+          ),
+          Text('${map['rating']} SR')
+        ]),
         isThreeLine: true,
-        onTap: () => _promptRemoveItem(index));
+        onLongPress: () => _promptRemoveItem(index),
+        onTap: () => _promptWeb(index));
   }
 
   void _addItem(String battletag) async {
@@ -154,8 +163,8 @@ class PlayerListViewState extends State<PlayerListView> {
               title: new Text('Add player'),
               content: new Theme(
                   data: new ThemeData(
-                    primaryColor: Colors.orange,
-                    primaryColorDark: Colors.orange,
+                    primaryColor: Theme.of(context).accentColor,
+                    primaryColorDark: Theme.of(context).accentColor,
                   ),
                   child: new TextField(
                     //autofocus: true,
@@ -181,6 +190,60 @@ class PlayerListViewState extends State<PlayerListView> {
                     })
               ]);
         });
+  }
+
+  void _promptWeb(int index) {
+    Map profile = _dataList[index];
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new SimpleDialog(
+              title: new Text('Open in Browser'),
+              children: <Widget>[
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://playoverwatch.com/career/${profile['platform']}/${profile['battletag'].replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: new Text('PlayOverwatch')),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://overbuff.com/players/${profile['platform']}/${profile['battletag'].replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: new Text('Overbuff')),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://overwatchtracker.com/profile/${profile['platform']}/global/${profile['battletag'].replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: new Text('Tracker Network')),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://masteroverwatch.com/profile/${profile['platform']}/global/${profile['battletag'].replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: new Text('Master Overwatch')),
+              ]);
+        });
+  }
+
+  void _launchURL(final String url) async {
+    try {
+      await launch(url,
+          option: new CustomTabsOption(
+            toolbarColor: Theme.of(context).primaryColor,
+            enableDefaultShare: true,
+            enableUrlBarHiding: true,
+            showPageTitle: true,
+          ));
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   Future _fetchData(String battletag) async {
