@@ -62,7 +62,7 @@ class PlayerListViewState extends State<PlayerListView> {
 
       if (_dataList != null) {
         for (Map player in _dataList) {
-          await _fetchData(player['battletag']);
+          await _fetchData(player['battletag'], player['platform'], player['region']);
         }
       }
     } catch (e) {
@@ -84,6 +84,7 @@ class PlayerListViewState extends State<PlayerListView> {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+        //debugShowCheckedModeBanner: false,
         title: 'OverWidget',
         theme: _isDarkTheme
             ? ThemeData(
@@ -155,21 +156,21 @@ class PlayerListViewState extends State<PlayerListView> {
         trailing: new Column(children: <Widget>[
           Container(
               height: 48, width: 48, child: Image.network(map['ratingIcon'])),
-          Text('${map['rating']} SR')
+          Text(map['rating'] > 0 ? '${map['rating']} SR' : '')
         ]),
         isThreeLine: true,
         onLongPress: () => _promptRemoveItem(index),
         onTap: () => _promptWeb(index));
   }
 
-  void _addItem(String battletag) async {
+  void _addItem(String battletag, String platform, String region) async {
     Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
         content: Text('Adding $battletag...'),
         duration: new Duration(seconds: 1)));
 
-    var map = await _fetchData(battletag);
+    var map = await _fetchData(battletag, platform, region);
     if (map != null && map['name'] != null) {
-      var player = {'battletag': map['name'], 'platform': 'pc', 'region': 'us'};
+      var player = {'battletag': map['name'], 'platform': platform, 'region': region};
       _dataList.add(player);
       print(_dataList);
       localStorage.writeFile(json.encode(_dataList));
@@ -220,10 +221,9 @@ class PlayerListViewState extends State<PlayerListView> {
                   child: new TextField(
                     autofocus: true,
                     controller: inputController,
-                    onSubmitted: (val) {
-                      _addItem(val);
-                      Navigator.of(context).pop();
-                    },
+                    //onSubmitted: (val) {
+                    //  Navigator.of(context).pop();
+                    //},
                     decoration: new InputDecoration(
                         labelText: 'Username', hintText: 'Battletag#1234'),
                   )),
@@ -234,7 +234,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new FlatButton(
                     child: new Text('ADD'),
                     onPressed: () {
-                      _addItem(inputController.text);
+                      _addItem(inputController.text, 'pc', 'us'); // ADD PLATFROM AND REGION
                       Navigator.pop(context);
                     })
               ]);
@@ -255,28 +255,29 @@ class PlayerListViewState extends State<PlayerListView> {
                           'https://playoverwatch.com/career/${profile['platform']}/${profile['battletag'].replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
-                    child: new Text('PlayOverwatch')),
-                new SimpleDialogOption(
+                    child: Row(children: <Widget>[ Padding(padding: EdgeInsets.only(right: 8.0), child: Icon(Icons.open_in_new)), Text('PlayOverwatch')])
+                ), new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
                           'https://overbuff.com/players/${profile['platform']}/${profile['battletag'].replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
-                    child: new Text('Overbuff')),
-                new SimpleDialogOption(
+                    child: Row(children: <Widget>[ Padding(padding: EdgeInsets.only(right: 8.0), child: Icon(Icons.open_in_new)), Text('Overbuff')])
+                ), new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
                           'https://overwatchtracker.com/profile/${profile['platform']}/global/${profile['battletag'].replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
-                    child: new Text('Tracker Network')),
-                new SimpleDialogOption(
+                    child: Row(children: <Widget>[ Padding(padding: EdgeInsets.only(right: 8.0), child: Icon(Icons.open_in_new)), Text('Tracker Network')])
+                ), new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
                           'https://masteroverwatch.com/profile/${profile['platform']}/global/${profile['battletag'].replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
-                    child: new Text('Master Overwatch')),
+                    child: Row(children: <Widget>[ Padding(padding: EdgeInsets.only(right: 8.0), child: Icon(Icons.open_in_new)), Text('Master Overwatch')])
+                ),
               ]);
         });
   }
@@ -285,7 +286,7 @@ class PlayerListViewState extends State<PlayerListView> {
     try {
       await launch(url,
           option: new CustomTabsOption(
-            toolbarColor: Theme.of(context).primaryColor,
+            toolbarColor: Theme.of(scaffoldContext).primaryColor,
             enableDefaultShare: true,
             enableUrlBarHiding: true,
             showPageTitle: true,
@@ -295,16 +296,19 @@ class PlayerListViewState extends State<PlayerListView> {
     }
   }
 
-  Future _fetchData(String battletag) async {
+  Future _fetchData(String battletag, String platform, String region, [int index]) async {
     try {
-      final url =
-          "https://ow-api.com/v1/stats/pc/us/${battletag.replaceAll('#', '-')}/profile";
+      final url = "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         var map = json.decode(response.body);
         if (map['name'] != null) {
-          setState(() => _playerList.add(map));
+          if (index != null) {
+            setState(() => _playerList.insert(index, map));
+          } else {
+            setState(() => _playerList.add(map));
+          }
           return map;
         } else {
           Scaffold.of(scaffoldContext)
