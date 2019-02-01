@@ -171,20 +171,8 @@ class PlayerListViewState extends State<PlayerListView> {
     int level = map['prestige'] * 100 + map['level'];
 
     return Dismissible(
-        background: Row(children: <Widget>[
-          Expanded(child: Container(
-              color: Colors.red,
-              child: Padding(
-                  padding: EdgeInsets.all(16.0), child: Icon(Icons.delete)),
-              alignment: Alignment.centerLeft
-          )),
-          Expanded(child: Container(
-              color: Colors.red,
-              child: Padding(
-                  padding: EdgeInsets.all(16.0), child: Icon(Icons.delete)),
-              alignment: Alignment.centerRight
-          )),
-        ]),
+        background:
+          Container(color: Colors.red,),
         key: Key(_playerList[index]['name']),
         onDismissed: (direction) {
           Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
@@ -212,7 +200,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 width: 48,
                 child: Image.network(map['ratingIcon'])
             ),
-            Text(map['rating'] > 0 ? '${map['rating']}SR' : '')
+            Text(map['rating'] > 0 ? '${map['rating']}' : '')
             ]
         )
         ,
