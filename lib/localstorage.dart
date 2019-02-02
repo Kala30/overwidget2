@@ -15,7 +15,7 @@ class LocalStorage {
 
   Future writeFile(String json) async {
     final file = await _localFile;
-    print(json);
+    //print(json);
     // Write the file
     return file.writeAsString(json);
   }
@@ -25,7 +25,7 @@ class LocalStorage {
 
     // Write the file
     file.writeAsString('');
-    print(file.readAsString());
+    //print(file.readAsString());
   }
 
   Future readFile() async {
@@ -34,7 +34,7 @@ class LocalStorage {
 
       // Read the file
       String contents = await file.readAsString();
-      print(contents);
+      //print(contents);
       return contents;
     } catch (e) {
       return null;

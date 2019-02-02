@@ -46,7 +46,7 @@ class PlayerListViewState extends State<PlayerListView> {
       prefs = sp;
       _isDarkTheme = prefs.getBool('darkTheme');
       if (_isDarkTheme == null) {
-        print('Prefs not found');
+        debugPrint('Prefs not found');
         setDarkTheme(false);
       }
       setState(() {
@@ -74,7 +74,7 @@ class PlayerListViewState extends State<PlayerListView> {
       });
 
     } catch (e) {
-      print('_initList(): ' + e.toString());
+      debugPrint('_initList(): ' + e.toString());
     }
 
     setState(() {
@@ -391,8 +391,11 @@ class PlayerListViewState extends State<PlayerListView> {
               ..rating = map['rating']
               ..ratingIcon = map['ratingIcon'];
 
+            _playerList.add(player);
             setState(() {
-              _playerList.add(player);
+              _playerList.sort( (a, b) =>
+                a.name.toLowerCase().compareTo(b.name.toString().toLowerCase())
+              );
             });
 
             localStorage.writeFile(toJson(_playerList));
@@ -403,7 +406,7 @@ class PlayerListViewState extends State<PlayerListView> {
         }
       }
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
     }
