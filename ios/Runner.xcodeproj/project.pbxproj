@@ -23,6 +23,44 @@
 		FEABC7B69F9144C45233875C /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFBEFDD254F3CAD1A5A1CD5E /* libPods-Runner.a */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		3C6F7AB52203DC62007F75C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4A6FEA545040E60BAC42D74F6F340CC2;
+			remoteInfo = flutter_custom_tabs;
+		};
+		3C6F7AB72203DC62007F75C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AF5CD64A70927E3C477D1B8A8CB5C177;
+			remoteInfo = path_provider;
+		};
+		3C6F7AB92203DC62007F75C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A2E733948BD13B81864052772E475457;
+			remoteInfo = "Pods-Runner";
+		};
+		3C6F7ABB2203DC62007F75C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BBA8F30F3961B85C0DC16B024C70F423;
+			remoteInfo = shared_preferences;
+		};
+		3C6F7ABD2203DC62007F75C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A5B0ECE2AFF1BE637975B637DC75A6ED;
+			remoteInfo = url_launcher;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -44,6 +82,7 @@
 		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		3B80C3931E831B6300D905FE /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = Flutter/App.framework; sourceTree = "<group>"; };
+		3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -73,6 +112,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C6F7AAE2203DC62007F75C2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C6F7AB62203DC62007F75C2 /* libflutter_custom_tabs.a */,
+				3C6F7AB82203DC62007F75C2 /* libpath_provider.a */,
+				3C6F7ABA2203DC62007F75C2 /* libPods-Runner.a */,
+				3C6F7ABC2203DC62007F75C2 /* libshared_preferences.a */,
+				3C6F7ABE2203DC62007F75C2 /* liburl_launcher.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		95B75E8C8DEB79C1376852F1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -141,6 +192,7 @@
 		DF90FC08BB80D8C1918373D2 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
+				3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -197,12 +249,56 @@
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 3C6F7AAE2203DC62007F75C2 /* Products */;
+					ProjectRef = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		3C6F7AB62203DC62007F75C2 /* libflutter_custom_tabs.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libflutter_custom_tabs.a;
+			remoteRef = 3C6F7AB52203DC62007F75C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3C6F7AB82203DC62007F75C2 /* libpath_provider.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpath_provider.a;
+			remoteRef = 3C6F7AB72203DC62007F75C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3C6F7ABA2203DC62007F75C2 /* libPods-Runner.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-Runner.a";
+			remoteRef = 3C6F7AB92203DC62007F75C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3C6F7ABC2203DC62007F75C2 /* libshared_preferences.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libshared_preferences.a;
+			remoteRef = 3C6F7ABB2203DC62007F75C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3C6F7ABE2203DC62007F75C2 /* liburl_launcher.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liburl_launcher.a;
+			remoteRef = 3C6F7ABD2203DC62007F75C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		97C146EC1CF9000F007C117D /* Resources */ = {

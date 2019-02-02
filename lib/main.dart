@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'localstorage.dart';
+import 'player.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 LocalStorage localStorage = new LocalStorage();
 
@@ -27,14 +29,14 @@ class PlayerListView extends StatefulWidget {
 class PlayerListViewState extends State<PlayerListView> {
   BuildContext scaffoldContext;
   SharedPreferences prefs;
-  List<Map> _playerList = [];
-  List<dynamic> _dataList = [];
+  List<Player> _playerList = [];
+  //List<dynamic> _dataList = [];
 
   bool _isDarkTheme = false;
   bool _isLoading = true;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  new GlobalKey<RefreshIndicatorState>();
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -54,32 +56,39 @@ class PlayerListViewState extends State<PlayerListView> {
       setNavigationTheme();
     });
 
+
     _initList();
   }
 
-  Future<void> _initList() async {
+  _initList() async {
     try {
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
-
+      _playerList = fromJson(contents);
       //String contents = '[{"battletag":"Kala30#1473"}]';
-      _dataList = json.decode(contents);
 
-      _playerList = [];
+      await _refreshList();
 
-      if (_dataList != null) {
-        for (Map player in _dataList) {
-          await _fetchData(
-              player['battletag'], player['platform'], player['region']);
-        }
-      }
+      setState(() {
+        _isLoading = false;
+      });
+
     } catch (e) {
-      print(e.toString());
+      print('_initList(): ' + e.toString());
     }
 
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _refreshList() async {
+    var dataList = _playerList;
+    _playerList = [];
+
+    for (Player player in dataList) {
+      await _fetchData(player.name, player.platform, player.region);
+    }
   }
 
   void setDarkTheme(bool value) {
@@ -104,22 +113,22 @@ class PlayerListViewState extends State<PlayerListView> {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      //debugShowCheckedModeBanner: false,
+        //debugShowCheckedModeBanner: false,
         title: 'OverWidget',
         theme: _isDarkTheme
             ? ThemeData(
-          brightness: Brightness.dark,
-          accentColor: Colors.red,
-        )
+                brightness: Brightness.dark,
+                accentColor: Colors.red,
+              )
             : ThemeData(
-            primaryColor: Colors.white,
-            primaryColorDark: Colors.grey[300],
-            accentColor: Colors.orange,
-            inputDecorationTheme: new InputDecorationTheme(
-                labelStyle: new TextStyle(color: Colors.orange),
-                border: new UnderlineInputBorder(
-                    borderSide: new BorderSide(
-                        color: Colors.orange, style: BorderStyle.solid)))),
+                primaryColor: Colors.white,
+                primaryColorDark: Colors.grey[300],
+                accentColor: Colors.orange,
+                inputDecorationTheme: new InputDecorationTheme(
+                    labelStyle: new TextStyle(color: Colors.orange),
+                    border: new UnderlineInputBorder(
+                        borderSide: new BorderSide(
+                            color: Colors.orange, style: BorderStyle.solid)))),
         home: buildHome());
   }
 
@@ -134,22 +143,21 @@ class PlayerListViewState extends State<PlayerListView> {
                   break;
               }
             },
-            itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry<String>>[
-              CheckedPopupMenuItem(
-                checked: _isDarkTheme,
-                value: 'darkTheme',
-                child: Text('Dark Theme'),
-              )
-            ],
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  CheckedPopupMenuItem(
+                    checked: _isDarkTheme,
+                    value: 'darkTheme',
+                    child: Text('Dark Theme'),
+                  )
+                ],
           )
         ]),
         body: _isLoading
             ? new Center(child: new CircularProgressIndicator())
             : new Builder(builder: (BuildContext context) {
-          scaffoldContext = context;
-          return _buildList();
-        }),
+                scaffoldContext = context;
+                return _buildList();
+              }),
         floatingActionButton: new FloatingActionButton(
             onPressed: _promptAddItem,
             tooltip: 'Add player',
@@ -159,7 +167,7 @@ class PlayerListViewState extends State<PlayerListView> {
   Widget _buildList() {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
-        onRefresh: _initList,
+        onRefresh: _refreshList,
         child: ListView.builder(itemBuilder: (context, index) {
           if (index < _playerList.length) {
             return _buildItem(_playerList[index], index);
@@ -167,47 +175,49 @@ class PlayerListViewState extends State<PlayerListView> {
         }));
   }
 
-  Widget _buildItem(Map map, int index) {
-    int level = map['prestige'] * 100 + map['level'];
-
+  Widget _buildItem(Player player, int index) {
     return Dismissible(
-        background:
-          Container(color: Colors.red,),
-        key: Key(_playerList[index]['name']),
+        background: Container(
+          color: Colors.red,
+        ),
+        key: Key(_playerList[index].name),
         onDismissed: (direction) {
+          var player = _playerList[index];
           Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
-            content: Text("Removed ${_playerList[index]['name']}"),
-            duration: new Duration(seconds: 1),
-            //action: SnackBarAction(label: 'Undo', onPressed: null),
+            content: Text("Removed ${player.name}"),
+            duration: new Duration(seconds: 5),
+            action: SnackBarAction(
+                label: 'UNDO',
+                onPressed: () {
+                  _addItem(player.name, player.platform, player.region);
+                }),
           ));
+
           _removeItem(index);
         },
         child: new ListTile(
-            title: new Text
-              (map["name"]),
-            leading
-                : new Container(
+            title: new Text(player.name),
+            leading: new Container(
                 height: 64,
-                width:
-                64,
-                child: new Image.network(map
-                ["icon"], fit: BoxFit.
-                contain)),
-            subtitle: new Text('Level $level\n${map["gamesWon"]} games won'),
-                trailing: new Column(children: <Widget>[
-                Container(
-                height: 48,
-                width: 48,
-                child: Image.network(map['ratingIcon'])
+                width: 64,
+                child: new FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: player.icon,
+                    fadeInDuration: Duration(milliseconds: 500),
+                    fit: BoxFit.contain)
             ),
-            Text(map['rating'] > 0 ? '${map['rating']}' : '')
-            ]
-        )
-        ,
-        isThreeLine: true,
-        onLongPress: () => _promptRemoveItem(index),
-        onTap: () => _promptWeb(index)
-    ));
+            subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
+            trailing: new Column(children: <Widget>[
+              Container(
+                  height: 48,
+                  width: 48,
+                  child: FadeInImage.memoryNetwork(placeholder: kTransparentImage, image: player.ratingIcon)
+              ),
+              Text(player.rating > 0 ? '${player.rating}' : '')
+            ]),
+            isThreeLine: true,
+            onLongPress: () => _promptRemoveItem(index),
+            onTap: () => _promptWeb(index)));
   }
 
   void _addItem(String battletag, String platform, String region) async {
@@ -215,23 +225,12 @@ class PlayerListViewState extends State<PlayerListView> {
         content: Text('Adding $battletag...'),
         duration: new Duration(seconds: 1)));
 
-    var map = await _fetchData(battletag, platform, region);
-    if (map != null && map['name'] != null) {
-      var player = {
-        'battletag': map['name'],
-        'platform': platform,
-        'region': region
-      };
-      _dataList.add(player);
-      print(_dataList);
-      localStorage.writeFile(json.encode(_dataList));
-    }
+    _fetchData(battletag, platform, region);
   }
 
   void _removeItem(int index) {
     setState(() => _playerList.removeAt(index));
-    _dataList.removeAt(index);
-    localStorage.writeFile(json.encode(_dataList));
+    localStorage.writeFile(toJson(_playerList));
   }
 
   void _promptRemoveItem(int index) {
@@ -239,7 +238,7 @@ class PlayerListViewState extends State<PlayerListView> {
         context: scaffoldContext,
         builder: (BuildContext context) {
           return new AlertDialog(
-              title: new Text('Remove ${_playerList[index]["name"]}?'),
+              title: new Text('Remove ${_playerList[index].name}?'),
               actions: <Widget>[
                 new FlatButton(
                     child: new Text('CANCEL'),
@@ -264,18 +263,10 @@ class PlayerListViewState extends State<PlayerListView> {
               title: new Text('Add player'),
               content: new Theme(
                   data: new ThemeData(
-                      brightness: Theme
-                          .of(context)
-                          .brightness,
-                      primaryColor: Theme
-                          .of(context)
-                          .accentColor,
-                      primaryColorDark: Theme
-                          .of(context)
-                          .accentColor,
-                      accentColor: Theme
-                          .of(context)
-                          .accentColor),
+                      brightness: Theme.of(context).brightness,
+                      primaryColor: Theme.of(context).accentColor,
+                      primaryColorDark: Theme.of(context).accentColor,
+                      accentColor: Theme.of(context).accentColor),
                   child: new TextField(
                     autofocus: true,
                     controller: inputController,
@@ -301,7 +292,7 @@ class PlayerListViewState extends State<PlayerListView> {
   }
 
   void _promptWeb(int index) {
-    Map profile = _dataList[index];
+    Player player = _playerList[index];
     showDialog(
         context: scaffoldContext,
         builder: (BuildContext context) {
@@ -311,8 +302,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
-                          'https://playoverwatch.com/career/${profile['platform']}/${profile['battletag']
-                              .replaceAll('#', '-')}');
+                          'https://playoverwatch.com/career/${player.platform}/${player.name.replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
                     child: Row(children: <Widget>[
@@ -324,8 +314,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
-                          'https://overbuff.com/players/${profile['platform']}/${profile['battletag']
-                              .replaceAll('#', '-')}');
+                          'https://overbuff.com/players/${player.platform}/${player.name.replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
                     child: Row(children: <Widget>[
@@ -337,8 +326,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
-                          'https://overwatchtracker.com/profile/${profile['platform']}/global/${profile['battletag']
-                              .replaceAll('#', '-')}');
+                          'https://overwatchtracker.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
                     child: Row(children: <Widget>[
@@ -350,8 +338,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new SimpleDialogOption(
                     onPressed: () {
                       _launchURL(
-                          'https://masteroverwatch.com/profile/${profile['platform']}/global/${profile['battletag']
-                              .replaceAll('#', '-')}');
+                          'https://masteroverwatch.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
                       Navigator.pop(context);
                     },
                     child: Row(children: <Widget>[
@@ -368,9 +355,7 @@ class PlayerListViewState extends State<PlayerListView> {
     try {
       await launch(url,
           option: new CustomTabsOption(
-            toolbarColor: Theme
-                .of(scaffoldContext)
-                .primaryColor,
+            toolbarColor: Theme.of(scaffoldContext).primaryColor,
             enableDefaultShare: true,
             enableUrlBarHiding: true,
             showPageTitle: true,
@@ -380,32 +365,43 @@ class PlayerListViewState extends State<PlayerListView> {
     }
   }
 
-  Future _fetchData(String battletag, String platform, String region,
-      [int index]) async {
-    try {
+  Future<void> _fetchData(String battletag, String platform, String region) async {
+    //try {
       final url =
-          "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll(
-          '#', '-')}/profile";
+          "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         var map = json.decode(response.body);
         if (map['name'] != null) {
-          if (index != null) {
-            setState(() => _playerList.insert(index, map));
-          } else {
-            setState(() => _playerList.add(map));
-          }
-          return map;
+            Player player = new Player()
+              ..name = map['name']
+              ..platform = platform
+              ..region = region
+
+              ..level = map['prestige']*100 + map['level']
+              ..icon = map['icon']
+              ..endorsement = map['endorsement']
+
+              ..gamesWon = map['gamesWon']
+              ..rating = map['rating']
+              ..ratingIcon = map['ratingIcon'];
+
+            setState(() {
+              _playerList.add(player);
+            });
+
+            localStorage.writeFile(toJson(_playerList));
+
         } else {
           Scaffold.of(scaffoldContext)
               .showSnackBar(SnackBar(content: Text('Player not found')));
-          return null;
         }
       }
-    } catch (e) {
+    /*} catch (e) {
+      print(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
-    }
+    }*/
   }
 }
