@@ -30,10 +30,12 @@ class PlayerListViewState extends State<PlayerListView> {
   BuildContext scaffoldContext;
   SharedPreferences prefs;
   List<Player> _playerList = [];
+
   //List<dynamic> _dataList = [];
 
   bool _isDarkTheme = false;
   bool _isLoading = true;
+  int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -53,9 +55,14 @@ class PlayerListViewState extends State<PlayerListView> {
         _isDarkTheme = prefs.getBool('darkTheme');
       });
 
+      _sortBy = prefs.getInt('sortBy');
+      if (_sortBy == null) {
+        _sortBy = 0;
+        prefs.setInt('sortBy', _sortBy);
+      }
+
       setNavigationTheme();
     });
-
 
     _initList();
   }
@@ -68,11 +75,6 @@ class PlayerListViewState extends State<PlayerListView> {
       //String contents = '[{"battletag":"Kala30#1473"}]';
 
       await _refreshList();
-
-      setState(() {
-        _isLoading = false;
-      });
-
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
@@ -83,11 +85,11 @@ class PlayerListViewState extends State<PlayerListView> {
   }
 
   Future<void> _refreshList() async {
-    var dataList = _playerList;
+    var dataList = List.from(_playerList);
     _playerList = [];
 
     for (Player player in dataList) {
-      await _fetchData(player.name, player.platform, player.region);
+      _fetchData(player.name, player.platform, player.region);
     }
   }
 
@@ -135,6 +137,7 @@ class PlayerListViewState extends State<PlayerListView> {
   Widget buildHome() {
     return new Scaffold(
         appBar: new AppBar(title: new Text('OverWidget'), actions: <Widget>[
+          IconButton(icon: Icon(Icons.sort), onPressed: _promptSortBy),
           PopupMenuButton<String>(
             onSelected: (String result) {
               switch (result) {
@@ -193,7 +196,6 @@ class PlayerListViewState extends State<PlayerListView> {
                     _playerList = playerList;
                   });
                   localStorage.writeFile(toJson(_playerList));
-
                 }),
           ));
 
@@ -208,15 +210,17 @@ class PlayerListViewState extends State<PlayerListView> {
                     placeholder: kTransparentImage,
                     image: player.icon,
                     fadeInDuration: Duration(milliseconds: 100),
-                    fit: BoxFit.contain)
-            ),
-            subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
+                    fit: BoxFit.contain)),
+            subtitle: new Text('Level ${player.level}\n' +
+                (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
             trailing: new Column(children: <Widget>[
               Container(
                   height: 48,
                   width: 48,
-                  child: FadeInImage.memoryNetwork(placeholder: kTransparentImage, image: player.ratingIcon)
-              ),
+                  child: FadeInImage.memoryNetwork(
+                      placeholder: kTransparentImage,
+                      image: player.ratingIcon,
+                      fadeInDuration: Duration(milliseconds: 100))),
               Text(player.rating > 0 ? '${player.rating}' : '')
             ]),
             isThreeLine: true,
@@ -235,6 +239,31 @@ class PlayerListViewState extends State<PlayerListView> {
   void _removeItem(int index) {
     setState(() => _playerList.removeAt(index));
     localStorage.writeFile(toJson(_playerList));
+  }
+
+  void _sortList() {
+    if (_sortBy == 1) {
+      // 1 = LEVEL
+      setState(() {
+        _playerList.sort((a, b) {
+          return b.level.compareTo(a.level);
+        });
+      });
+    } else if (_sortBy == 2) {
+      // 2 = SR
+      setState(() {
+        _playerList.sort((a, b) {
+          return b.rating.compareTo(a.rating);
+        });
+      });
+    } else {
+      // 0 = NAME
+      setState(() {
+        _playerList.sort((a, b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+      });
+    }
   }
 
   void _promptRemoveItem(int index) {
@@ -302,6 +331,7 @@ class PlayerListViewState extends State<PlayerListView> {
         builder: (BuildContext context) {
           return new SimpleDialog(
               title: new Text('Open in Browser'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
               children: <Widget>[
                 new SimpleDialogOption(
                     onPressed: () {
@@ -351,6 +381,17 @@ class PlayerListViewState extends State<PlayerListView> {
                           child: Icon(Icons.open_in_new)),
                       Text('Master Overwatch')
                     ])),
+                Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
+                  child: FlatButton(
+                    textTheme: ButtonTextTheme.accent,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("CANCEL"),
+                  ),
+                )
               ]);
         });
   }
@@ -369,42 +410,90 @@ class PlayerListViewState extends State<PlayerListView> {
     }
   }
 
-  Future<void> _fetchData(String battletag, String platform, String region) async {
+  void _promptSortBy() {
+    showDialog(
+        context: scaffoldContext,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+              title: new Text('Sort by'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+              children: <Widget>[
+                RadioListTile(
+                    title: Text('Name'),
+                    value: 0,
+                    groupValue: _sortBy,
+                    activeColor: Theme.of(scaffoldContext).accentColor,
+                    onChanged: (a) {
+                      setSortBy(a);
+                      Navigator.pop(context);
+                    }),
+                RadioListTile(
+                    title: Text('Level'),
+                    value: 1,
+                    groupValue: _sortBy,
+                    activeColor: Theme.of(scaffoldContext).accentColor,
+                    onChanged: (a) {
+                      setSortBy(a);
+                      Navigator.pop(context);
+                    }),
+                RadioListTile(
+                    title: Text('SR'),
+                    value: 2,
+                    groupValue: _sortBy,
+                    activeColor: Theme.of(scaffoldContext).accentColor,
+                    onChanged: (a) {
+                      setSortBy(a);
+                      Navigator.pop(context);
+                    }),
+                Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
+                  child: FlatButton(
+                    textTheme: ButtonTextTheme.accent,
+                    onPressed: () { Navigator.pop(context); },
+                    child: Text("CANCEL"),
+                  ),
+                )
+              ]);
+        });
+  }
+
+  setSortBy(int order) {
+    _sortBy = order;
+    prefs.setInt('sortBy', _sortBy);
+    _sortList();
+  }
+
+  Future<void> _fetchData(
+      String battletag, String platform, String region) async {
     try {
-      final url =
-          "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
-      final response = await http.get(url);
+    final url =
+        "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
+    final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        var map = json.decode(response.body);
-        if (map['name'] != null) {
-            Player player = new Player()
-              ..name = map['name']
-              ..platform = platform
-              ..region = region
+    if (response.statusCode == 200) {
+      var map = json.decode(response.body);
+      if (map['name'] != null) {
+        Player player = new Player()
+          ..name = map['name']
+          ..platform = platform
+          ..region = region
+          ..level = map['prestige'] * 100 + map['level']
+          ..icon = map['icon']
+          ..endorsement = map['endorsement']
+          ..gamesWon = map['gamesWon']
+          ..rating = map['rating']
+          ..ratingIcon = map['ratingIcon'];
 
-              ..level = map['prestige']*100 + map['level']
-              ..icon = map['icon']
-              ..endorsement = map['endorsement']
+        _playerList.add(player);
+        _sortList();
 
-              ..gamesWon = map['gamesWon']
-              ..rating = map['rating']
-              ..ratingIcon = map['ratingIcon'];
-
-            _playerList.add(player);
-            setState(() {
-              _playerList.sort( (a, b) =>
-                a.name.toLowerCase().compareTo(b.name.toString().toLowerCase())
-              );
-            });
-
-            localStorage.writeFile(toJson(_playerList));
-
-        } else {
-          Scaffold.of(scaffoldContext)
-              .showSnackBar(SnackBar(content: Text('Player not found')));
-        }
+        localStorage.writeFile(toJson(_playerList));
+      } else {
+        Scaffold.of(scaffoldContext)
+            .showSnackBar(SnackBar(content: Text('Player not found')));
       }
+    }
     } catch (e) {
       debugPrint(e.toString());
       Scaffold.of(scaffoldContext)
