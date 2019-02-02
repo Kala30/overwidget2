@@ -182,14 +182,18 @@ class PlayerListViewState extends State<PlayerListView> {
         ),
         key: Key(_playerList[index].name),
         onDismissed: (direction) {
-          var player = _playerList[index];
+          List<Player> playerList = new List.from(_playerList);
           Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
             content: Text("Removed ${player.name}"),
             duration: new Duration(seconds: 5),
             action: SnackBarAction(
                 label: 'UNDO',
                 onPressed: () {
-                  _addItem(player.name, player.platform, player.region);
+                  setState(() {
+                    _playerList = playerList;
+                  });
+                  localStorage.writeFile(toJson(_playerList));
+
                 }),
           ));
 
@@ -203,7 +207,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 child: new FadeInImage.memoryNetwork(
                     placeholder: kTransparentImage,
                     image: player.icon,
-                    fadeInDuration: Duration(milliseconds: 500),
+                    fadeInDuration: Duration(milliseconds: 100),
                     fit: BoxFit.contain)
             ),
             subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
@@ -366,7 +370,7 @@ class PlayerListViewState extends State<PlayerListView> {
   }
 
   Future<void> _fetchData(String battletag, String platform, String region) async {
-    //try {
+    try {
       final url =
           "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
       final response = await http.get(url);
@@ -398,10 +402,10 @@ class PlayerListViewState extends State<PlayerListView> {
               .showSnackBar(SnackBar(content: Text('Player not found')));
         }
       }
-    /*} catch (e) {
+    } catch (e) {
       print(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
-    }*/
+    }
   }
 }
