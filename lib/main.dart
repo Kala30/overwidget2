@@ -78,13 +78,13 @@ class PlayerListViewState extends State<PlayerListView> {
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   Future<void> _refreshList() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
     var dataList = List.from(_playerList);
     _playerList = [];
 
@@ -489,6 +489,9 @@ class PlayerListViewState extends State<PlayerListView> {
         _sortList();
 
         localStorage.writeFile(toJson(_playerList));
+        setState(() {
+          _isLoading = false;
+        });
       } else {
         Scaffold.of(scaffoldContext)
             .showSnackBar(SnackBar(content: Text('Player not found')));
