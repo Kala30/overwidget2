@@ -71,7 +71,8 @@ class PlayerListViewState extends State<PlayerListView> {
     try {
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
-      _playerList = fromJson(contents);
+      if (contents != null)
+        _playerList = fromJson(contents);
       //String contents = '[{"battletag":"Kala30#1473"}]';
 
       await _refreshList();
@@ -88,8 +89,9 @@ class PlayerListViewState extends State<PlayerListView> {
     var dataList = List.from(_playerList);
     _playerList = [];
 
-    if (dataList.length == 0) {
+    if (dataList == null || dataList.length == 0) {
       setState(() {_isLoading = false;});
+      return;
     }
 
     for (Player player in dataList) {
