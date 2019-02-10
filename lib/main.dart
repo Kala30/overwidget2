@@ -84,9 +84,13 @@ class PlayerListViewState extends State<PlayerListView> {
     setState(() {
       _isLoading = true;
     });
-    
+
     var dataList = List.from(_playerList);
     _playerList = [];
+
+    if (dataList.length == 0) {
+      setState(() {_isLoading = false;});
+    }
 
     for (Player player in dataList) {
       _fetchData(player.name, player.platform, player.region);
