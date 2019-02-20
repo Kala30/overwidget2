@@ -71,8 +71,7 @@ class PlayerListViewState extends State<PlayerListView> {
     try {
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
-      if (contents != null)
-        _playerList = fromJson(contents);
+      if (contents != null) _playerList = fromJson(contents);
       //String contents = '[{"battletag":"Kala30#1473"}]';
 
       await _refreshList();
@@ -90,7 +89,9 @@ class PlayerListViewState extends State<PlayerListView> {
     _playerList = [];
 
     if (dataList == null || dataList.length == 0) {
-      setState(() {_isLoading = false;});
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -293,6 +294,8 @@ class PlayerListViewState extends State<PlayerListView> {
   }
 
   void _promptAddItem() {
+    String platform = "pc";
+    String battletag;
     showDialog(
         context: scaffoldContext,
         builder: (BuildContext context) {
@@ -300,21 +303,41 @@ class PlayerListViewState extends State<PlayerListView> {
 
           return new AlertDialog(
               title: new Text('Add player'),
-              content: new Theme(
-                  data: new ThemeData(
-                      brightness: Theme.of(context).brightness,
-                      primaryColor: Theme.of(context).accentColor,
-                      primaryColorDark: Theme.of(context).accentColor,
-                      accentColor: Theme.of(context).accentColor),
-                  child: new TextField(
-                    autofocus: true,
-                    controller: inputController,
-                    //onSubmitted: (val) {
-                    //  Navigator.of(context).pop();
-                    //},
-                    decoration: new InputDecoration(
-                        labelText: 'Username', hintText: 'Battletag#1234'),
-                  )),
+              content: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Expanded(child: Theme(
+                        data: new ThemeData(
+                            brightness: Theme.of(context).brightness,
+                            primaryColor: Theme.of(context).accentColor,
+                            primaryColorDark: Theme.of(context).accentColor,
+                            accentColor: Theme.of(context).accentColor),
+                        child: new TextField(
+                          //autofocus: true,
+                          //controller: inputController,
+                          onChanged: (String value) {
+                            battletag = value;
+                          },
+                          keyboardAppearance:
+                              _isDarkTheme ? Brightness.dark : Brightness.light,
+                          decoration: new InputDecoration(
+                              labelText: 'Username',
+                              hintText: 'Battletag#1234'),
+                        ))),
+                    DropdownButtonHideUnderline(child: DropdownButton(
+                      items: [
+                        DropdownMenuItem(value: "pc", child: Text("PC")),
+                        DropdownMenuItem(value: "psn", child: Text("PSN")),
+                        DropdownMenuItem(value: "xbl", child: Text("XBL")),
+                      ],
+                      value: platform,
+                      onChanged: (var text) {
+                        setState(() {
+                          platform = text;
+                        });
+                      },
+                    ))
+                  ]),
               actions: <Widget>[
                 new FlatButton(
                     child: new Text('CANCEL'),
@@ -322,8 +345,7 @@ class PlayerListViewState extends State<PlayerListView> {
                 new FlatButton(
                     child: new Text('ADD'),
                     onPressed: () {
-                      _addItem(inputController.text, 'pc',
-                          'us'); // ADD PLATFROM AND REGION
+                      _addItem(battletag, platform, "us");
                       Navigator.pop(context);
                     })
               ]);
@@ -456,7 +478,9 @@ class PlayerListViewState extends State<PlayerListView> {
                   padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
                   child: FlatButton(
                     textTheme: ButtonTextTheme.accent,
-                    onPressed: () { Navigator.pop(context); },
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     child: Text("CANCEL"),
                   ),
                 )
@@ -473,40 +497,50 @@ class PlayerListViewState extends State<PlayerListView> {
   Future<void> _fetchData(
       String battletag, String platform, String region) async {
     try {
-    final url =
-        "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
-    final response = await http.get(url);
+      String url;
+      if (platform == "xbl" || platform == "psn") {
+        url =
+            "https://ow-api.com/v1/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
+      } else {
+        url =
+            "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
+      }
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      var map = json.decode(response.body);
-      if (map['name'] != null) {
-        Player player = new Player()
-          ..name = map['name']
-          ..platform = platform
-          ..region = region
-          ..level = map['prestige'] * 100 + map['level']
-          ..icon = map['icon']
-          ..endorsement = map['endorsement']
-          ..gamesWon = map['gamesWon']
-          ..rating = map['rating']
-          ..ratingIcon = map['ratingIcon'];
+      if (response.statusCode == 200) {
+        var map = json.decode(response.body);
+        if (map['name'] != null) {
+          Player player = new Player()
+            ..name = map['name']
+            ..platform = platform
+            ..region = region
+            ..level = map['prestige'] * 100 + map['level']
+            ..icon = map['icon']
+            ..endorsement = map['endorsement']
+            ..gamesWon = map['gamesWon']
+            ..rating = map['rating']
+            ..ratingIcon = map['ratingIcon'];
 
-        _playerList.add(player);
-        _sortList();
+          _playerList.add(player);
+          _sortList();
 
-        localStorage.writeFile(toJson(_playerList));
-        setState(() {
-          _isLoading = false;
-        });
+          localStorage.writeFile(toJson(_playerList));
+        } else {
+          Scaffold.of(scaffoldContext).showSnackBar(
+              SnackBar(content: Text('Unable to find $battletag')));
+        }
       } else {
         Scaffold.of(scaffoldContext)
             .showSnackBar(SnackBar(content: Text('Player not found')));
       }
-    }
     } catch (e) {
       debugPrint(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 }
