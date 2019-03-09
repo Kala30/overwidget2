@@ -313,7 +313,7 @@ class PlayerListViewState extends State<PlayerListView> {
                             primaryColorDark: Theme.of(context).accentColor,
                             accentColor: Theme.of(context).accentColor),
                         child: new TextField(
-                          //autofocus: true,
+                          autofocus: true,
                           //controller: inputController,
                           onChanged: (String value) {
                             battletag = value;
