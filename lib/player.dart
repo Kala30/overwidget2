@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class Player {
 
-  Player();
+  Player(this.name, this.platform, this.region);
 
   String name;
   String platform;
@@ -47,11 +47,7 @@ List<Player> fromJson(String body) {
   List<Player> players = [];
 
   for(Map map in maps) {
-    Player player = new Player()
-      ..name = map['name']
-      ..platform = map['platform']
-      ..region = map['region']
-
+    Player player = new Player(map['name'], map['platform'], map['region'])
       ..rating = map['rating']
       ..ratingIcon = map['ratingIcon']
       ..endorsement = map['endorsement']

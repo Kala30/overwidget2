@@ -96,8 +96,19 @@ class PlayerListViewState extends State<PlayerListView> {
     }
 
     for (Player player in dataList) {
-      _fetchData(player.name, player.platform, player.region);
+      _fetchData(player, alwaysAdd: true);
     }
+
+    /*Player testPlayer = new Player("B.O.B.", "pc", "us")
+      ..level = 100
+      ..icon = "https://d15f34w2p8l1cc.cloudfront.net/overwatch/efb3fa31f0c7a141928da914bc566753aaeb80c07067c10ee8d9a52ed28e4176.png"
+      ..endorsement = 4
+      ..gamesWon = 2
+      ..rating = 4000
+      ..ratingIcon = "https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png";
+
+
+    _fetchData(testPlayer, alwaysAdd: true);*/
   }
 
   void setDarkTheme(bool value) {
@@ -240,7 +251,7 @@ class PlayerListViewState extends State<PlayerListView> {
         content: Text('Adding $battletag...'),
         duration: new Duration(seconds: 1)));
 
-    _fetchData(battletag, platform, region);
+    _fetchData(new Player(battletag, platform, region));
   }
 
   void _removeItem(int index) {
@@ -494,8 +505,11 @@ class PlayerListViewState extends State<PlayerListView> {
     _sortList();
   }
 
-  Future<void> _fetchData(
-      String battletag, String platform, String region) async {
+  Future<void> _fetchData(Player player, {bool alwaysAdd: false}) async {
+    String battletag = player.name;
+    String platform = player.platform;
+    String region = player.region;
+
     try {
       String url;
       if (platform == "xbl" || platform == "psn") {
@@ -510,10 +524,7 @@ class PlayerListViewState extends State<PlayerListView> {
       if (response.statusCode == 200) {
         var map = json.decode(response.body);
         if (map['name'] != null) {
-          Player player = new Player()
-            ..name = map['name']
-            ..platform = platform
-            ..region = region
+          Player player = new Player(map['name'], platform, region)
             ..level = map['prestige'] * 100 + map['level']
             ..icon = map['icon']
             ..endorsement = map['endorsement']
@@ -523,8 +534,13 @@ class PlayerListViewState extends State<PlayerListView> {
 
           _playerList.add(player);
           _sortList();
-
           localStorage.writeFile(toJson(_playerList));
+
+          setState(() {
+            _isLoading = false;
+          });
+
+          return;
         } else {
           Scaffold.of(scaffoldContext).showSnackBar(
               SnackBar(content: Text('Unable to find $battletag')));
@@ -537,6 +553,11 @@ class PlayerListViewState extends State<PlayerListView> {
       debugPrint(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
+    }
+
+    if (alwaysAdd) {
+      _playerList.add(player);
+      _sortList();
     }
 
     setState(() {
