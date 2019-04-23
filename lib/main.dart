@@ -174,16 +174,13 @@ class PlayerListViewState extends State<PlayerListView> {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   PopupMenuItem(
                     value: 'darkTheme',
-                    child: SwitchListTile(
+                    child: IgnorePointer(child: SwitchListTile(
                         dense: true,
                         title: Text("Dark Theme"),
                         value: _isDarkTheme,
-                        onChanged: (value) {
-                          setDarkTheme(!_isDarkTheme);
-                          Navigator.of(context).pop();
-                          },
+                        onChanged: (value) {},
                         activeColor: Theme.of(context).accentColor
-                    )
+                    ))
                   )
                 ],
           )
