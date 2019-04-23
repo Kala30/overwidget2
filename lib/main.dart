@@ -34,11 +34,12 @@ class PlayerListViewState extends State<PlayerListView> {
   //List<dynamic> _dataList = [];
 
   bool _isDarkTheme = false;
-  bool _isLoading = true;
+  bool _isLoading = false;
   int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+
 
   @override
   void initState() {
@@ -69,12 +70,18 @@ class PlayerListViewState extends State<PlayerListView> {
 
   _initList() async {
     try {
+      setState(() {
+        _isLoading = false;
+      });
+
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
       if (contents != null) _playerList = fromJson(contents);
       //String contents = '[{"battletag":"Kala30#1473"}]';
 
-      await _refreshList();
+      //await _refreshList();
+      _refreshIndicatorKey.currentState.show();
+
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
@@ -82,10 +89,10 @@ class PlayerListViewState extends State<PlayerListView> {
 
   Future<void> _refreshList() async {
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
     });
 
-    var dataList = List.from(_playerList);
+    /*var dataList = List.from(_playerList);
     _playerList = [];
 
     if (dataList == null || dataList.length == 0) {
@@ -93,10 +100,10 @@ class PlayerListViewState extends State<PlayerListView> {
         _isLoading = false;
       });
       return;
-    }
+    }*/
 
-    for (Player player in dataList) {
-      _fetchData(player, alwaysAdd: true);
+    for (int i = 0; i < _playerList.length; i++) {
+      await _fetchData(_playerList[i], alwaysAdd: true, index: i);
     }
 
     /*Player testPlayer = new Player("B.O.B.", "pc", "us")
@@ -165,10 +172,18 @@ class PlayerListViewState extends State<PlayerListView> {
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  CheckedPopupMenuItem(
-                    checked: _isDarkTheme,
+                  PopupMenuItem(
                     value: 'darkTheme',
-                    child: Text('Dark Theme'),
+                    child: SwitchListTile(
+                        dense: true,
+                        title: Text("Dark Theme"),
+                        value: _isDarkTheme,
+                        onChanged: (value) {
+                          setDarkTheme(!_isDarkTheme);
+                          Navigator.of(context).pop();
+                          },
+                        activeColor: Theme.of(context).accentColor
+                    )
                   )
                 ],
           )
@@ -505,7 +520,7 @@ class PlayerListViewState extends State<PlayerListView> {
     _sortList();
   }
 
-  Future<void> _fetchData(Player player, {bool alwaysAdd: false}) async {
+  Future<void> _fetchData(Player player, {bool alwaysAdd: false, int index: -1}) async {
     String battletag = player.name;
     String platform = player.platform;
     String region = player.region;
@@ -532,7 +547,11 @@ class PlayerListViewState extends State<PlayerListView> {
             ..rating = map['rating']
             ..ratingIcon = map['ratingIcon'];
 
-          _playerList.add(player);
+          if (index == -1) {
+            _playerList.add(player);
+          } else {
+            _playerList[index] = player;
+          }
           _sortList();
           localStorage.writeFile(toJson(_playerList));
 
@@ -555,11 +574,14 @@ class PlayerListViewState extends State<PlayerListView> {
           .showSnackBar(SnackBar(content: Text('Network Error')));
     }
 
-    if (alwaysAdd) {
-      _playerList.add(player);
-      _sortList();
+    // Add player even if error occurs
+    if (alwaysAdd == true) {
+      if (index == -1) {
+        _playerList.add(player);
+      } else {
+        _playerList[index] = player;
+      }
     }
-
     setState(() {
       _isLoading = false;
     });
