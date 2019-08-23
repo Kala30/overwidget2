@@ -245,8 +245,8 @@ class PlayerListViewState extends State<PlayerListView> {
                 (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
             trailing: new Column(children: <Widget>[
               Container(
-                  height: 48,
-                  width: 48,
+                  height: 36,
+                  width: 36,
                   child: FadeInImage.memoryNetwork(
                       placeholder: kTransparentImage,
                       image: player.ratingIcon,
@@ -322,7 +322,7 @@ class PlayerListViewState extends State<PlayerListView> {
     showDialog(
         context: scaffoldContext,
         builder: (BuildContext context) {
-          TextEditingController inputController = new TextEditingController();
+          //TextEditingController inputController = new TextEditingController();
 
           return new AlertDialog(
               title: new Text('Add player'),
