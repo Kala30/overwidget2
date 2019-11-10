@@ -8,17 +8,11 @@ import 'package:transparent_image/transparent_image.dart';
 
 import 'localstorage.dart';
 import 'player.dart';
-import 'player_listview.dart';
+import 'player_page.dart';
+import 'news_page.dart';
 
 void main() async {
-  runApp(MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Home();
-  }
+  runApp(Home());
 }
 
 class Home extends StatefulWidget {
@@ -52,12 +46,11 @@ class HomeState extends State<Home> {
       });
 
       setNavigationTheme();
-
-      _children.add(PlayerListView(isDarkTheme, setDarkTheme));
-      _children.add(PlayerListView(isDarkTheme, setDarkTheme));
-      _children.add(PlayerListView(isDarkTheme, setDarkTheme));
-
     });
+
+    _children.add(NewsPage(isDarkTheme, setDarkTheme));
+    _children.add(PlayerPage(isDarkTheme, setDarkTheme));
+    _children.add(PlayerPage(isDarkTheme, setDarkTheme));
   }
 
   @override

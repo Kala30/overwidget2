@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'localstorage.dart';
 import 'main.dart';
 import 'player.dart';
+
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 
+
 LocalStorage localStorage = new LocalStorage();
 
 
-class PlayerListView extends StatefulWidget {
+class PlayerPage extends StatefulWidget {
   bool _isDarkTheme;
 
   Function setDarkTheme;
-  PlayerListView(this._isDarkTheme, this.setDarkTheme);
+  PlayerPage(this._isDarkTheme, this.setDarkTheme);
   @override
-  createState() => new PlayerListViewState();
+  createState() => new PlayerPageState();
 }
 
-class PlayerListViewState extends State<PlayerListView> {
+class PlayerPageState extends State<PlayerPage> {
   BuildContext scaffoldContext;
   SharedPreferences prefs;
   List<Player> _playerList = [];
@@ -155,11 +158,12 @@ class PlayerListViewState extends State<PlayerListView> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
-        child: ListView.builder(itemBuilder: (context, index) {
-          if (index < _playerList.length) {
-            return _buildItem(_playerList[index], index);
-          }
-        }));
+        child: ListView.builder(
+            itemCount: _playerList.length,
+            itemBuilder: (context, index) {
+              return _buildItem(_playerList[index], index);
+        })
+    );
   }
 
   Widget _buildItem(Player player, int index) {
