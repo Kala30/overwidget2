@@ -59,7 +59,7 @@ class HomeState extends State<Home> {
 
       setNavigationTheme();
     });
-    
+
     _children.add(NewsPage(isDarkTheme, setDarkTheme));
     _children.add(PlayerPage(isDarkTheme, setDarkTheme));
     _children.add(PlayerPage(isDarkTheme, setDarkTheme));

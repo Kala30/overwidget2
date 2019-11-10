@@ -29,10 +29,8 @@ class PlayerPageState extends State<PlayerPage> {
   SharedPreferences prefs;
   List<Player> _playerList = [];
 
-  //List<dynamic> _dataList = [];
-
   bool _isDarkTheme;
-  bool _isLoading = false;
+  bool _isBusy;
   int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -61,14 +59,12 @@ class PlayerPageState extends State<PlayerPage> {
 
   _initList() async {
     try {
-      setState(() {
-        _isLoading = false;
-      });
-
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
       if (contents != null) _playerList = fromJson(contents);
       //String contents = '[{"battletag":"Kala30#1473"}]';
+
+      setState(() {});
 
       //await _refreshList();
       _refreshIndicatorKey.currentState.show();
@@ -79,9 +75,8 @@ class PlayerPageState extends State<PlayerPage> {
   }
 
   Future<void> _refreshList() async {
-    setState(() {
-      _isLoading = false;
-    });
+
+    _isBusy = true;
 
     /*var dataList = List.from(_playerList);
     _playerList = [];
@@ -96,6 +91,8 @@ class PlayerPageState extends State<PlayerPage> {
     for (int i = 0; i < _playerList.length; i++) {
       await _fetchData(_playerList[i], alwaysAdd: true, index: i);
     }
+
+    _isBusy = false;
 
     /*Player testPlayer = new Player("B.O.B.", "pc", "us")
       ..level = 100
@@ -142,9 +139,7 @@ class PlayerPageState extends State<PlayerPage> {
             ],
           )
         ]),
-        body: _isLoading
-            ? new Center(child: new CircularProgressIndicator())
-            : new Builder(builder: (BuildContext context) {
+        body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
           return _buildList();
         }),
@@ -277,60 +272,70 @@ class PlayerPageState extends State<PlayerPage> {
   void _promptAddItem() {
     String platform = "pc";
     String battletag;
-    showDialog(
-        context: scaffoldContext,
-        builder: (BuildContext context) {
-          TextEditingController inputController = new TextEditingController();
+    if (!_isBusy) {
+      showDialog(
+          context: scaffoldContext,
+          builder: (BuildContext context) {
+            TextEditingController inputController = new TextEditingController();
 
-          return new AlertDialog(
-              title: new Text('Add player'),
-              content: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Expanded(child: Theme(
-                        data: new ThemeData(
-                            brightness: Theme.of(context).brightness,
-                            primaryColor: Theme.of(context).accentColor,
-                            primaryColorDark: Theme.of(context).accentColor,
-                            accentColor: Theme.of(context).accentColor),
-                        child: new TextField(
-                          autofocus: true,
-                          //controller: inputController,
-                          onChanged: (String value) {
-                            battletag = value;
-                          },
-                          keyboardAppearance:
-                          _isDarkTheme ? Brightness.dark : Brightness.light,
-                          decoration: new InputDecoration(
-                              labelText: 'Username',
-                              hintText: 'Battletag#1234'),
-                        ))),
-                    DropdownButtonHideUnderline(child: DropdownButton(
-                      items: [
-                        DropdownMenuItem(value: "pc", child: Text("PC")),
-                        DropdownMenuItem(value: "psn", child: Text("PSN")),
-                        DropdownMenuItem(value: "xbl", child: Text("XBL")),
-                      ],
-                      value: platform,
-                      onChanged: (var text) {
-                        setState(() {
-                          platform = text;
-                        });
-                      },
-                    ))
-                  ]),
-              actions: <Widget>[
-                new FlatButton(
-                    child: new Text('CANCEL'),
-                    onPressed: () => Navigator.of(context).pop()),
-                new FlatButton(
-                    child: new Text('ADD'),
-                    onPressed: () {
-                      _addItem(battletag, platform, "us");
-                      Navigator.pop(context);
-                    })
-              ]);
-        });
+            return new AlertDialog(
+                title: new Text('Add player'),
+                content: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Expanded(child: Theme(
+                          data: new ThemeData(
+                              brightness: Theme
+                                  .of(context)
+                                  .brightness,
+                              primaryColor: Theme
+                                  .of(context)
+                                  .accentColor,
+                              primaryColorDark: Theme
+                                  .of(context)
+                                  .accentColor,
+                              accentColor: Theme
+                                  .of(context)
+                                  .accentColor),
+                          child: new TextField(
+                            autofocus: true,
+                            //controller: inputController,
+                            onChanged: (String value) {
+                              battletag = value;
+                            },
+                            keyboardAppearance:
+                            _isDarkTheme ? Brightness.dark : Brightness.light,
+                            decoration: new InputDecoration(
+                                labelText: 'Username',
+                                hintText: 'Battletag#1234'),
+                          ))),
+                      DropdownButtonHideUnderline(child: DropdownButton(
+                        items: [
+                          DropdownMenuItem(value: "pc", child: Text("PC")),
+                          DropdownMenuItem(value: "psn", child: Text("PSN")),
+                          DropdownMenuItem(value: "xbl", child: Text("XBL")),
+                        ],
+                        value: platform,
+                        onChanged: (var text) {
+                          setState(() {
+                            platform = text;
+                          });
+                        },
+                      ))
+                    ]),
+                actions: <Widget>[
+                  new FlatButton(
+                      child: new Text('CANCEL'),
+                      onPressed: () => Navigator.of(context).pop()),
+                  new FlatButton(
+                      child: new Text('ADD'),
+                      onPressed: () {
+                        _addItem(battletag, platform, "us");
+                        Navigator.pop(context);
+                      })
+                ]);
+          });
+    }
   }
 
   void _promptWeb(int index) {
@@ -510,9 +515,7 @@ class PlayerPageState extends State<PlayerPage> {
           _sortList();
           localStorage.writeFile(toJson(_playerList));
 
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() {});
 
           return;
         } else {
@@ -537,8 +540,6 @@ class PlayerPageState extends State<PlayerPage> {
         _playerList[index] = player;
       }
     }
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() {});
   }
 }
