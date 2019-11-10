@@ -12,7 +12,14 @@ import 'player_page.dart';
 import 'news_page.dart';
 
 void main() async {
-  runApp(Home());
+  runApp(MainApp());
+}
+
+class MainApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Home();
+  }
 }
 
 class Home extends StatefulWidget {
@@ -34,20 +41,25 @@ class HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    SharedPreferences.getInstance().then((SharedPreferences sp) {
+    _initTheme();
+  }
+
+  _initTheme() async {
+    await SharedPreferences.getInstance().then((SharedPreferences sp) {
       prefs = sp;
       isDarkTheme = prefs.getBool('darkTheme');
       if (isDarkTheme == null) {
         debugPrint('Prefs not found');
         setDarkTheme(false);
       }
+
       setState(() {
         isDarkTheme = prefs.getBool('darkTheme');
       });
 
       setNavigationTheme();
     });
-
+    
     _children.add(NewsPage(isDarkTheme, setDarkTheme));
     _children.add(PlayerPage(isDarkTheme, setDarkTheme));
     _children.add(PlayerPage(isDarkTheme, setDarkTheme));

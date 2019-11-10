@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -19,7 +20,6 @@ class News {
 
 class NewsPage extends StatefulWidget {
   bool _isDarkTheme;
-
   Function setDarkTheme;
   NewsPage(this._isDarkTheme, this.setDarkTheme);
   @override
@@ -30,11 +30,8 @@ class NewsPageState extends State<NewsPage> {
   BuildContext scaffoldContext;
   List<News> _newsList = [];
 
-  //List<dynamic> _dataList = [];
-
   bool _isDarkTheme;
   bool _isLoading = true;
-  int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   new GlobalKey<RefreshIndicatorState>();
@@ -117,26 +114,22 @@ class NewsPageState extends State<NewsPage> {
 
   Widget _buildItem(News news) {
     return Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.all(12),
         child: InkWell(
-          onTap: () => _launchURL(news.url),
-          child: Column(
-            children: <Widget>[
-              Container(
-                  width: double.infinity,
-                  child: FadeInImage.memoryNetwork(
-                      fit: BoxFit.cover,
-                      placeholder: kTransparentImage,
-                      image: news.imgUrl)
-              ),
-              ListTile(
-                title: Text(news.title, style: TextStyle(fontSize: 18)),
-                subtitle: Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                    child: Text(news.date, style: TextStyle(fontSize: 16))
+            onTap: () => _launchURL(news.url),
+            child: Column(
+              children: <Widget>[
+                Ink.image(image: NetworkImage(news.imgUrl), height: 200, fit: BoxFit.cover),
+                ListTile(
+                    title: Text(news.title, style: TextStyle(fontSize: 18)),
+                    subtitle: Padding(
+                        padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                        child: Text(news.date, style: TextStyle(fontSize: 16))
+                    )
                 )
-              )
-            ],
-          ),
+              ],
+            )
         )
     );
   }
