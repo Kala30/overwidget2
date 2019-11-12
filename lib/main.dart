@@ -10,6 +10,7 @@ import 'localstorage.dart';
 import 'player.dart';
 import 'player_page.dart';
 import 'news_page.dart';
+import 'patch_page.dart';
 
 void main() async {
   runApp(MainApp());
@@ -29,19 +30,20 @@ class Home extends StatefulWidget {
   }
 }
 
+
 class HomeState extends State<Home> {
 
   bool isDarkTheme = false;
   SharedPreferences prefs;
   int _currentIndex = 0;
-  final List<Widget> _children = [];
+  List<Widget> _children = [];
   BuildContext scaffoldContext;
 
   @override
   void initState() {
-    super.initState();
-
     _initTheme();
+
+    super.initState();
   }
 
   _initTheme() async {
@@ -60,9 +62,10 @@ class HomeState extends State<Home> {
       setNavigationTheme();
     });
 
-    _children.add(NewsPage(isDarkTheme, setDarkTheme));
-    _children.add(PlayerPage(isDarkTheme, setDarkTheme));
-    _children.add(PlayerPage(isDarkTheme, setDarkTheme));
+    _children.add(NewsPage(setDarkTheme));
+    _children.add(PlayerPage(setDarkTheme));
+    _children.add(PatchPage(setDarkTheme));
+
   }
 
   @override
@@ -91,7 +94,10 @@ class HomeState extends State<Home> {
 
   Widget buildScaffold() {
     return Scaffold(
-      body: _children[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _children,
+      ),
       bottomNavigationBar: new Builder(builder: (BuildContext context) {
         return BottomNavigationBar(
           onTap: onTabTapped,

@@ -1,34 +1,26 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
-
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-class News {
+class Patch {
   String title;
-  String description;
   String url;
-  String imgUrl;
   String date;
 }
 
-class NewsPage extends StatefulWidget {
+class PatchPage extends StatefulWidget {
   Function setDarkTheme;
-  NewsPage(this.setDarkTheme);
+  PatchPage(this.setDarkTheme);
   @override
-  createState() => new NewsPageState();
+  createState() => new PatchPageState();
 }
 
-class NewsPageState extends State<NewsPage> {
+class PatchPageState extends State<PatchPage> {
   BuildContext scaffoldContext;
-  List<News> _newsList = [];
+  List<Patch> _patchList = [];
 
   bool _isLoading = true;
 
@@ -40,6 +32,7 @@ class NewsPageState extends State<NewsPage> {
 
   @override
   void initState() {
+
     _initList();
 
     super.initState();
@@ -47,17 +40,15 @@ class NewsPageState extends State<NewsPage> {
 
   _initList() async {
     prefs = await SharedPreferences.getInstance();
-
     try {
       await _fetchData();
     } catch (e) {
-      debugPrint('NewsPage: ' + e.toString());
+      debugPrint('PatchPage: ' + e.toString());
     }
-
   }
 
   Future _refreshList() async {
-    _newsList = [];
+    _patchList = [];
     _fetchData();
   }
 
@@ -74,7 +65,7 @@ class NewsPageState extends State<NewsPage> {
             onSelected: (String result) {
               switch (result) {
                 case 'darkTheme':
-                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
+                  widget.setDarkTheme(prefs.getBool('darkTheme'));
                   break;
               }
             },
@@ -94,7 +85,6 @@ class NewsPageState extends State<NewsPage> {
         ]),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
-          scaffoldContext = context;
           return _isLoading ? new Center(child: new CircularProgressIndicator())
               : _buildList();
         })
@@ -106,42 +96,19 @@ class NewsPageState extends State<NewsPage> {
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
         child: ListView.builder(
-            itemCount: _newsList.length,
+            itemCount: _patchList.length,
             itemBuilder: (context, index) {
-              return _buildItem(_newsList[index]);
+              return _buildItem(_patchList[index]);
             }
         )
     );
   }
 
-  Widget _buildItem(News news) {
-    return Card(
-        clipBehavior: Clip.antiAlias,
-        margin: EdgeInsets.all(12),
-        child: InkWell(
-            onTap: () => _launchURL(news.url),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 200, fit: BoxFit.cover)
-                ),
-                ListTile(
-                    title: Text(news.title/*, style: TextStyle(fontSize: 18)*/),
-                    subtitle: Padding(
-                        padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget> [
-                              Text(news.description/*, style: TextStyle(fontSize: 16)*/),
-                              Padding(child: Text(news.date), padding: EdgeInsets.only(top: 8))
-                            ]
-                        )
-                    )
-                )
-              ],
-            )
-        )
+  Widget _buildItem(Patch patch) {
+    return ListTile(
+        title: Text(patch.title),
+        subtitle: Text(patch.date),
+        onTap: () => _launchURL(patch.url)
     );
   }
 
@@ -164,21 +131,19 @@ class NewsPageState extends State<NewsPage> {
 
     try {
       var client = Client();
-      Response response = await client.get('https://playoverwatch.com/news');
+      Response response = await client.get('https://playoverwatch.com/news/patch-notes/pc');
 
       var document = parse(response.body);
-      List<dom.Element> blogs = document.querySelectorAll(
-          'ul.blog-list > li.blog-info');
+      List<dom.Element> patches = document.querySelectorAll(
+          'div.PatchNotesSideNav > ul > li.PatchNotesSideNav-listItem');
 
-      for (var blog in blogs) {
-        News news = new News()
-          ..title = blog.querySelector('a.link-title').text
-          ..url = 'https://playoverwatch.com' + blog.querySelector('a.link-title').attributes['href']
-          ..imgUrl = 'https:' + blog.querySelector('img').attributes['src']
-          ..description = blog.querySelector('div.summary').text
-          ..date = blog.querySelectorAll('div.sub-title > span')[1].text;
+      for (var item in patches) {
+        Patch patch = new Patch()
+          ..title = item.querySelector('h3').text
+          ..url = 'https://playoverwatch.com/news/patch-notes/pc' + item.querySelector('a').attributes['href']
+          ..date = item.querySelector('p').text;
 
-        _newsList.add(news);
+        _patchList.add(patch);
       }
 
     } catch (e) {

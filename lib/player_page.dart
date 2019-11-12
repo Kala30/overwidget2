@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'localstorage.dart';
-import 'main.dart';
 import 'player.dart';
 
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
@@ -16,10 +15,8 @@ LocalStorage localStorage = new LocalStorage();
 
 
 class PlayerPage extends StatefulWidget {
-  bool _isDarkTheme;
-
   Function setDarkTheme;
-  PlayerPage(this._isDarkTheme, this.setDarkTheme);
+  PlayerPage(this.setDarkTheme);
   @override
   createState() => new PlayerPageState();
 }
@@ -29,7 +26,6 @@ class PlayerPageState extends State<PlayerPage> {
   SharedPreferences prefs;
   List<Player> _playerList = [];
 
-  bool _isDarkTheme;
   bool _isBusy;
   int _sortBy = 0;
 
@@ -40,8 +36,6 @@ class PlayerPageState extends State<PlayerPage> {
   @override
   void initState() {
     super.initState();
-
-    _isDarkTheme = widget._isDarkTheme;
 
     SharedPreferences.getInstance().then((SharedPreferences sp) {
       prefs = sp;
@@ -120,8 +114,7 @@ class PlayerPageState extends State<PlayerPage> {
             onSelected: (String result) {
               switch (result) {
                 case 'darkTheme':
-                  widget.setDarkTheme(!_isDarkTheme);
-                  _isDarkTheme = !_isDarkTheme;
+                  widget.setDarkTheme(prefs.getBool('darkTheme'));
                   break;
               }
             },
@@ -131,7 +124,7 @@ class PlayerPageState extends State<PlayerPage> {
                   child: IgnorePointer(child: SwitchListTile(
                       dense: true,
                       title: Text("Dark Theme"),
-                      value: _isDarkTheme,
+                      value: prefs.getBool('darkTheme'),
                       onChanged: (value) {},
                       activeColor: Theme.of(context).accentColor
                   ))
@@ -200,10 +193,12 @@ class PlayerPageState extends State<PlayerPage> {
               Container(
                   height: 40,
                   width: 40,
-                  child: FadeInImage.memoryNetwork(
+                  child: player.ratingIcon != '' ? FadeInImage.memoryNetwork(
                       placeholder: kTransparentImage,
                       image: player.ratingIcon,
-                      fadeInDuration: Duration(milliseconds: 100))),
+                      fadeInDuration: Duration(milliseconds: 100))
+                      : Image.memory(kTransparentImage)
+              ),
               Text(player.rating > 0 ? '${player.rating}' : '')
             ]),
             isThreeLine: true,
@@ -304,7 +299,7 @@ class PlayerPageState extends State<PlayerPage> {
                               battletag = value;
                             },
                             keyboardAppearance:
-                            _isDarkTheme ? Brightness.dark : Brightness.light,
+                            prefs.getBool('darkTheme') ? Brightness.dark : Brightness.light,
                             decoration: new InputDecoration(
                                 labelText: 'Username',
                                 hintText: 'Battletag#1234'),
