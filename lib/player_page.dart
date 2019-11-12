@@ -114,7 +114,7 @@ class PlayerPageState extends State<PlayerPage> {
             onSelected: (String result) {
               switch (result) {
                 case 'darkTheme':
-                  widget.setDarkTheme(prefs.getBool('darkTheme'));
+                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
                   break;
               }
             },
@@ -191,15 +191,15 @@ class PlayerPageState extends State<PlayerPage> {
                 (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
             trailing: new Column(children: <Widget>[
               Container(
-                  height: 40,
-                  width: 40,
+                  height: 38,
+                  width: 38,
                   child: player.ratingIcon != '' ? FadeInImage.memoryNetwork(
                       placeholder: kTransparentImage,
                       image: player.ratingIcon,
                       fadeInDuration: Duration(milliseconds: 100))
                       : Image.memory(kTransparentImage)
               ),
-              Text(player.rating > 0 ? '${player.rating}' : '')
+              Text(player.rating > 0 ? '${player.rating}' : '', style: TextStyle(fontSize: 14))
             ]),
             isThreeLine: true,
             onLongPress: () => _promptRemoveItem(index),
@@ -323,6 +323,7 @@ class PlayerPageState extends State<PlayerPage> {
                       child: new Text('CANCEL'),
                       onPressed: () => Navigator.of(context).pop()),
                   new FlatButton(
+                      //textTheme: ButtonTextTheme.accent,
                       child: new Text('ADD'),
                       onPressed: () {
                         _addItem(battletag, platform, "us");
@@ -394,7 +395,6 @@ class PlayerPageState extends State<PlayerPage> {
                   alignment: Alignment.centerRight,
                   padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
                   child: FlatButton(
-                    textTheme: ButtonTextTheme.accent,
                     onPressed: () {
                       Navigator.pop(context);
                     },

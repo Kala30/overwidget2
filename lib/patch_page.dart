@@ -65,7 +65,7 @@ class PatchPageState extends State<PatchPage> {
             onSelected: (String result) {
               switch (result) {
                 case 'darkTheme':
-                  widget.setDarkTheme(prefs.getBool('darkTheme'));
+                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
                   break;
               }
             },
