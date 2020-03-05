@@ -29,6 +29,7 @@ class NewsPage extends StatefulWidget {
 class NewsPageState extends State<NewsPage> {
   BuildContext scaffoldContext;
   List<News> _newsList = [];
+  List<News> _featuredList = [];
 
   bool _isLoading = true;
 
@@ -58,6 +59,7 @@ class NewsPageState extends State<NewsPage> {
 
   Future _refreshList() async {
     _newsList = [];
+    _featuredList = [];
     _fetchData();
   }
 
@@ -106,11 +108,32 @@ class NewsPageState extends State<NewsPage> {
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
         child: ListView.builder(
-            itemCount: _newsList.length,
+            itemCount: _newsList.length + 2,
             itemBuilder: (context, index) {
-              return _buildItem(_newsList[index]);
+              if (index == 0)
+                return _buildFeaturedList();
+              else if (index == 1)
+                return Padding(
+                    padding: EdgeInsets.only(left: 12),
+                    child: Text('News', style: Theme.of(context).textTheme.title)
+                );
+              else
+                return _buildItem(_newsList[index-2]);
             }
         )
+    );
+  }
+
+  Widget _buildFeaturedList() {
+    return SizedBox(
+      height: 280,
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _featuredList.length,
+          itemBuilder: (context, index) {
+            return _buildFeaturedItem(_featuredList[index]);
+          }
+      )
     );
   }
 
@@ -145,6 +168,28 @@ class NewsPageState extends State<NewsPage> {
     );
   }
 
+  Widget _buildFeaturedItem(News news) {
+    return Container(width: 240, child: Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.all(12),
+        child: InkWell(
+            onTap: () => _launchURL(news.url),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 160, fit: BoxFit.cover)
+                ),
+                ListTile(
+                    title: Text(news.title, style: TextStyle(fontSize: 14))
+                )
+              ],
+            )
+        )
+    ));
+  }
+
+
   void _launchURL(final String url) async {
     try {
       await launch(url,
@@ -167,21 +212,39 @@ class NewsPageState extends State<NewsPage> {
       Response response = await client.get('https://playoverwatch.com/news');
 
       var document = parse(response.body);
+
+      // Featured
+      List<dom.Element> featured = document.querySelectorAll(
+          'section.NewsHeader-featured > a.CardLink');
+
+      for (var blog in featured) {
+        News news = new News()
+          ..title = blog.querySelector('.Card-title').text
+          ..url = 'https://playoverwatch.com' + blog.attributes['href']
+          ..imgUrl = 'https:' + blog.querySelector('.Card-thumbnail').attributes['style'].replaceAll(RegExp(r'background-image: url\(|\)'), '')
+          ..description = ''
+          ..date = '';
+
+        _featuredList.add(news);
+      }
+
+      // News
       List<dom.Element> blogs = document.querySelectorAll(
-          'ul.blog-list > li.blog-info');
+          'ul.NewsList-list > li.NewsItem');
 
       for (var blog in blogs) {
         News news = new News()
-          ..title = blog.querySelector('a.link-title').text
-          ..url = 'https://playoverwatch.com' + blog.querySelector('a.link-title').attributes['href']
-          ..imgUrl = 'https:' + blog.querySelector('img').attributes['src']
-          ..description = blog.querySelector('div.summary').text
-          ..date = blog.querySelectorAll('div.sub-title > span')[1].text;
+          ..title = blog.querySelector('a.NewsItem-title').text
+          ..url = 'https://playoverwatch.com' + blog.querySelector('a.NewsItem-title').attributes['href']
+          ..imgUrl = 'https:' + blog.querySelector('.Card-thumbnail').attributes['style'].replaceAll(RegExp(r'background-image: url\(|\)'), '')
+          ..description = blog.querySelector('div.NewsItem-summary').text
+          ..date = blog.querySelector('div.NewsItem-subtitle > span').text;
 
         _newsList.add(news);
       }
 
     } catch (e) {
+      debugPrint(e.toString());
       Scaffold.of(scaffoldContext).showSnackBar(SnackBar(content: Text('Error fetching news')));
     }
 
