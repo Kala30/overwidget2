@@ -115,7 +115,7 @@ class NewsPageState extends State<NewsPage> {
               else if (index == 1)
                 return Padding(
                     padding: EdgeInsets.only(left: 12),
-                    child: Text('News', style: Theme.of(context).textTheme.title)
+                    child: Text('News', style: Theme.of(context).textTheme.headline5)
                 );
               else
                 return _buildItem(_newsList[index-2]);

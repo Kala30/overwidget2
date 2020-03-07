@@ -9,6 +9,7 @@ class Patch {
   String title;
   String url;
   String date;
+  String description;
 }
 
 class PatchPage extends StatefulWidget {
@@ -27,12 +28,10 @@ class PatchPageState extends State<PatchPage> {
   SharedPreferences prefs;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  new GlobalKey<RefreshIndicatorState>();
-
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
-
     _initList();
 
     super.initState();
@@ -52,7 +51,6 @@ class PatchPageState extends State<PatchPage> {
     _fetchData();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return buildHome();
@@ -60,35 +58,39 @@ class PatchPageState extends State<PatchPage> {
 
   Widget buildHome() {
     return new Scaffold(
-        appBar: new AppBar(title: new Text('OverWidget', style: TextStyle(fontFamily: 'GoogleSans', color: Theme.of(context).accentColor) ), actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: (String result) {
-              switch (result) {
-                case 'darkTheme':
-                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem(
-                  value: 'darkTheme',
-                  child: IgnorePointer(child: SwitchListTile(
-                      dense: true,
-                      title: Text("Dark Theme"),
-                      value: prefs.getBool('darkTheme'),
-                      onChanged: (value) {},
-                      activeColor: Theme.of(context).accentColor
-                  ))
+        appBar: new AppBar(
+            title: new Text('OverWidget',
+                style: TextStyle(
+                    fontFamily: 'GoogleSans',
+                    color: Theme.of(context).accentColor)),
+            actions: <Widget>[
+              PopupMenuButton<String>(
+                onSelected: (String result) {
+                  switch (result) {
+                    case 'darkTheme':
+                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem(
+                      value: 'darkTheme',
+                      child: IgnorePointer(
+                          child: SwitchListTile(
+                              dense: true,
+                              title: Text("Dark Theme"),
+                              value: prefs.getBool('darkTheme'),
+                              onChanged: (value) {},
+                              activeColor: Theme.of(context).accentColor)))
+                ],
               )
-            ],
-          )
-        ]),
+            ]),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
-          return _isLoading ? new Center(child: new CircularProgressIndicator())
+          return _isLoading
+              ? new Center(child: new CircularProgressIndicator())
               : _buildList();
-        })
-    );
+        }));
   }
 
   Widget _buildList() {
@@ -96,20 +98,52 @@ class PatchPageState extends State<PatchPage> {
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
         child: ListView.builder(
-            itemCount: _patchList.length,
+            itemCount: _patchList.length + 1,
             itemBuilder: (context, index) {
-              return _buildItem(_patchList[index]);
-            }
-        )
-    );
+              if (index == 0) return _buildFeatured(_patchList[0]);
+              return _buildItem(_patchList[index - 1]);
+            }));
   }
 
   Widget _buildItem(Patch patch) {
     return ListTile(
         title: Text(patch.title),
         subtitle: Text(patch.date),
-        onTap: () => _launchURL(patch.url)
-    );
+        onTap: () => _launchURL(patch.url));
+  }
+
+  Widget _buildFeatured(Patch patch) {
+    return Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.all(12),
+        child: InkWell(
+            onTap: () => _launchURL(patch.url),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Align(
+                        child: Text('Latest', style: Theme.of(context).textTheme.headline5),
+                        alignment: Alignment.centerLeft
+                    )
+                ),
+                ListTile(
+                    title: Text(patch.title),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                            child: Text(patch.description)),
+                        Align(
+                            alignment: Alignment.centerRight,
+                            child: FlatButton(
+                                child: new Text('MORE'),
+                                textTheme: ButtonTextTheme.accent,
+                                onPressed: () => _launchURL(patch.url)))
+                      ]))
+              ],
+            )));
   }
 
   void _launchURL(final String url) async {
@@ -126,12 +160,11 @@ class PatchPageState extends State<PatchPage> {
     }
   }
 
-
   Future _fetchData() async {
-
     try {
       var client = Client();
-      Response response = await client.get('https://playoverwatch.com/news/patch-notes/pc');
+      Response response =
+          await client.get('https://playoverwatch.com/news/patch-notes/pc');
 
       var document = parse(response.body);
       List<dom.Element> patches = document.querySelectorAll(
@@ -140,20 +173,24 @@ class PatchPageState extends State<PatchPage> {
       for (var item in patches) {
         Patch patch = new Patch()
           ..title = item.querySelector('h3').text
-          ..url = 'https://playoverwatch.com/news/patch-notes/pc' + item.querySelector('a').attributes['href']
+          ..url = 'https://playoverwatch.com/news/patch-notes/pc' +
+              item.querySelector('a').attributes['href']
           ..date = item.querySelector('p').text;
 
         _patchList.add(patch);
       }
 
+      // Featured
+      dom.Element featured =
+          document.querySelector('.patch-notes-body > .patch-notes-patch');
+      _patchList[0].description = featured.querySelector('h2').text;
     } catch (e) {
-      Scaffold.of(scaffoldContext).showSnackBar(SnackBar(content: Text('Error fetching news')));
+      Scaffold.of(scaffoldContext)
+          .showSnackBar(SnackBar(content: Text('Error fetching news')));
     }
 
     setState(() {
       _isLoading = false;
     });
   }
-
-
 }

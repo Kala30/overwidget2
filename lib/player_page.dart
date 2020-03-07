@@ -10,9 +10,7 @@ import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-
 LocalStorage localStorage = new LocalStorage();
-
 
 class PlayerPage extends StatefulWidget {
   Function setDarkTheme;
@@ -30,8 +28,7 @@ class PlayerPageState extends State<PlayerPage> {
   int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  new GlobalKey<RefreshIndicatorState>();
-
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -45,7 +42,6 @@ class PlayerPageState extends State<PlayerPage> {
         _sortBy = 0;
         prefs.setInt('sortBy', _sortBy);
       }
-
     });
 
     _initList();
@@ -62,14 +58,12 @@ class PlayerPageState extends State<PlayerPage> {
 
       //await _refreshList();
       _refreshIndicatorKey.currentState.show();
-
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
   }
 
   Future<void> _refreshList() async {
-
     _isBusy = true;
 
     /*var dataList = List.from(_playerList);
@@ -100,7 +94,6 @@ class PlayerPageState extends State<PlayerPage> {
     _fetchData(testPlayer, alwaysAdd: true);*/
   }
 
-
   @override
   Widget build(BuildContext context) {
     return buildHome();
@@ -108,30 +101,34 @@ class PlayerPageState extends State<PlayerPage> {
 
   Widget buildHome() {
     return new Scaffold(
-        appBar: new AppBar(title: new Text('OverWidget', style: TextStyle(fontFamily: 'GoogleSans', color: Theme.of(context).accentColor) ), actions: <Widget>[
-          IconButton(icon: Icon(Icons.sort), onPressed: _promptSortBy),
-          PopupMenuButton<String>(
-            onSelected: (String result) {
-              switch (result) {
-                case 'darkTheme':
-                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem(
-                  value: 'darkTheme',
-                  child: IgnorePointer(child: SwitchListTile(
-                      dense: true,
-                      title: Text("Dark Theme"),
-                      value: prefs.getBool('darkTheme'),
-                      onChanged: (value) {},
-                      activeColor: Theme.of(context).accentColor
-                  ))
+        appBar: new AppBar(
+            title: new Text('OverWidget',
+                style: TextStyle(
+                    fontFamily: 'GoogleSans',
+                    color: Theme.of(context).accentColor)),
+            actions: <Widget>[
+              IconButton(icon: Icon(Icons.sort), onPressed: _promptSortBy),
+              PopupMenuButton<String>(
+                onSelected: (String result) {
+                  switch (result) {
+                    case 'darkTheme':
+                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem(
+                      value: 'darkTheme',
+                      child: IgnorePointer(
+                          child: SwitchListTile(
+                              dense: true,
+                              title: Text("Dark Theme"),
+                              value: prefs.getBool('darkTheme'),
+                              onChanged: (value) {},
+                              activeColor: Theme.of(context).accentColor)))
+                ],
               )
-            ],
-          )
-        ]),
+            ]),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
           return _buildList();
@@ -150,8 +147,7 @@ class PlayerPageState extends State<PlayerPage> {
             itemCount: _playerList.length,
             itemBuilder: (context, index) {
               return _buildItem(_playerList[index], index);
-        })
-    );
+            }));
   }
 
   Widget _buildItem(Player player, int index) {
@@ -193,13 +189,14 @@ class PlayerPageState extends State<PlayerPage> {
               Container(
                   height: 38,
                   width: 38,
-                  child: player.ratingIcon != '' ? FadeInImage.memoryNetwork(
-                      placeholder: kTransparentImage,
-                      image: player.ratingIcon,
-                      fadeInDuration: Duration(milliseconds: 100))
-                      : Image.memory(kTransparentImage)
-              ),
-              Text(player.rating > 0 ? '${player.rating}' : '', style: TextStyle(fontSize: 14))
+                  child: player.ratingIcon != ''
+                      ? FadeInImage.memoryNetwork(
+                          placeholder: kTransparentImage,
+                          image: player.ratingIcon,
+                          fadeInDuration: Duration(milliseconds: 100))
+                      : Image.memory(kTransparentImage)),
+              Text(player.rating > 0 ? '${player.rating}' : '',
+                  style: TextStyle(fontSize: 14))
             ]),
             isThreeLine: true,
             onLongPress: () => _promptRemoveItem(index),
@@ -271,65 +268,63 @@ class PlayerPageState extends State<PlayerPage> {
       showDialog(
           context: scaffoldContext,
           builder: (BuildContext context) {
-            TextEditingController inputController = new TextEditingController();
-
-            return new AlertDialog(
-                title: new Text('Add player'),
-                content: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Expanded(child: Theme(
-                          data: new ThemeData(
-                              brightness: Theme
-                                  .of(context)
-                                  .brightness,
-                              primaryColor: Theme
-                                  .of(context)
-                                  .accentColor,
-                              primaryColorDark: Theme
-                                  .of(context)
-                                  .accentColor,
-                              accentColor: Theme
-                                  .of(context)
-                                  .accentColor),
-                          child: new TextField(
+            return Theme(
+                data: new ThemeData(
+                    brightness: Theme.of(context).brightness,
+                    primaryColor: Theme.of(context).accentColor,
+                    primaryColorDark: Theme.of(context).accentColor,
+                    accentColor: Theme.of(context).accentColor
+                ),
+                child: new AlertDialog(
+                    title: new Text('Add player'),
+                    content: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          Expanded(
+                              child: new TextField(
                             autofocus: true,
                             //controller: inputController,
                             onChanged: (String value) {
                               battletag = value;
                             },
-                            keyboardAppearance:
-                            prefs.getBool('darkTheme') ? Brightness.dark : Brightness.light,
+                            keyboardAppearance: prefs.getBool('darkTheme')
+                                ? Brightness.dark
+                                : Brightness.light,
                             decoration: new InputDecoration(
                                 labelText: 'Username',
                                 hintText: 'Battletag#1234'),
-                          ))),
-                      DropdownButtonHideUnderline(child: DropdownButton(
-                        items: [
-                          DropdownMenuItem(value: "pc", child: Text("PC")),
-                          DropdownMenuItem(value: "psn", child: Text("PSN")),
-                          DropdownMenuItem(value: "xbl", child: Text("XBL")),
-                        ],
-                        value: platform,
-                        onChanged: (var text) {
-                          setState(() {
-                            platform = text;
-                          });
-                        },
-                      ))
-                    ]),
-                actions: <Widget>[
-                  new FlatButton(
-                      child: new Text('CANCEL'),
-                      onPressed: () => Navigator.of(context).pop()),
-                  new FlatButton(
-                      //textTheme: ButtonTextTheme.accent,
-                      child: new Text('ADD'),
-                      onPressed: () {
-                        _addItem(battletag, platform, "us");
-                        Navigator.pop(context);
-                      })
-                ]);
+                          )),
+                          DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                            items: [
+                              DropdownMenuItem(value: "pc", child: Text("PC")),
+                              DropdownMenuItem(
+                                  value: "psn", child: Text("PSN")),
+                              DropdownMenuItem(
+                                  value: "xbl", child: Text("XBL")),
+                            ],
+                            value: platform,
+                            onChanged: (var text) {
+                              setState(() {
+                                platform = text;
+                              });
+                            },
+                          ))
+                        ]),
+                    actions: <Widget>[
+                      new FlatButton(
+                          child: new Text('CANCEL'),
+                          textTheme: ButtonTextTheme.accent,
+                          onPressed: () => Navigator.of(context).pop()),
+                      new FlatButton(
+                          //textTheme: ButtonTextTheme.accent,
+                          child: new Text('ADD'),
+                          textTheme: ButtonTextTheme.accent,
+                          onPressed: () {
+                            _addItem(battletag, platform, "us");
+                            Navigator.pop(context);
+                          })
+                    ]));
           });
     }
   }
@@ -475,7 +470,8 @@ class PlayerPageState extends State<PlayerPage> {
     _sortList();
   }
 
-  Future<void> _fetchData(Player player, {bool alwaysAdd: false, int index: -1}) async {
+  Future<void> _fetchData(Player player,
+      {bool alwaysAdd: false, int index: -1}) async {
     String battletag = player.name;
     String platform = player.platform;
     String region = player.region;
@@ -484,10 +480,10 @@ class PlayerPageState extends State<PlayerPage> {
       String url;
       if (platform == "xbl" || platform == "psn") {
         url =
-        "https://ow-api.com/v1/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
+            "https://ow-api.com/v1/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
       } else {
         url =
-        "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
+            "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
       }
       final response = await http.get(url);
 
