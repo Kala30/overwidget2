@@ -13,6 +13,7 @@ import 'news_page.dart';
 import 'patch_page.dart';
 
 void main() async {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MainApp());
 }
 
@@ -70,29 +71,30 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
     return new MaterialApp(
       //debugShowCheckedModeBanner: false,
         title: 'OverWidget',
         theme: isDarkTheme
             ? ThemeData(
-          brightness: Brightness.dark,
-          accentColor: Colors.red,
-        )
+              brightness: Brightness.dark,
+              accentColor: Colors.red,)
             : ThemeData(
-            primaryColor: Colors.white,
-            primaryColorDark: Colors.grey[300],
-            accentColor: Colors.orange,
-            inputDecorationTheme: new InputDecorationTheme(
-                labelStyle: new TextStyle(color: Colors.orange),
-                border: new UnderlineInputBorder(
-                    borderSide: new BorderSide(
-                        color: Colors.orange, style: BorderStyle.solid)))),
+              primaryColor: Colors.white,
+              primaryColorDark: Colors.grey[300],
+              accentColor: Colors.orange,
+              inputDecorationTheme: new InputDecorationTheme(
+                  labelStyle: new TextStyle(color: Colors.orange),
+                  border: new UnderlineInputBorder(
+                      borderSide: new BorderSide(
+                          color: Colors.orange, style: BorderStyle.solid)))),
         home: buildScaffold()
     );
   }
 
 
   Widget buildScaffold() {
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,

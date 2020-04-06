@@ -123,7 +123,7 @@ class PatchPageState extends State<PatchPage> {
                 Padding(
                     padding: EdgeInsets.all(16),
                     child: Align(
-                        child: Text('Latest', style: Theme.of(context).textTheme.headline5),
+                        child: Text('Latest', style: Theme.of(context).textTheme.title),
                         alignment: Alignment.centerLeft
                     )
                 ),

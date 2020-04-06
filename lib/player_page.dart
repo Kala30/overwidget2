@@ -157,24 +157,10 @@ class PlayerPageState extends State<PlayerPage> {
         ),
         key: Key(_playerList[index].name),
         onDismissed: (direction) {
-          List<Player> playerList = new List.from(_playerList);
-          Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
-            content: Text("Removed ${player.name}"),
-            duration: new Duration(seconds: 5),
-            action: SnackBarAction(
-                label: 'UNDO',
-                onPressed: () {
-                  setState(() {
-                    _playerList = playerList;
-                  });
-                  localStorage.writeFile(toJson(_playerList));
-                }),
-          ));
-
           _removeItem(index);
         },
         child: new ListTile(
-            title: new Text(player.name),
+            title: new Text(player.name, style: TextStyle(fontSize: 18)),
             leading: new Container(
                 height: 64,
                 width: 64,
@@ -183,12 +169,12 @@ class PlayerPageState extends State<PlayerPage> {
                     image: player.icon,
                     fadeInDuration: Duration(milliseconds: 100),
                     fit: BoxFit.contain)),
-            subtitle: new Text('Level ${player.level}\n' +
-                (player.gamesWon > 0 ? '${player.gamesWon} games won' : '')),
+            subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
+                style: TextStyle(fontSize: 16)),
             trailing: new Column(children: <Widget>[
               Container(
-                  height: 38,
-                  width: 38,
+                  height: 35,
+                  width: 35,
                   child: player.ratingIcon != ''
                       ? FadeInImage.memoryNetwork(
                           placeholder: kTransparentImage,
@@ -212,6 +198,21 @@ class PlayerPageState extends State<PlayerPage> {
   }
 
   void _removeItem(int index) {
+
+    List<Player> playerList = new List.from(_playerList);
+    Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
+      content: Text("Removed ${_playerList[index].name}"),
+      duration: new Duration(seconds: 5),
+      action: SnackBarAction(
+          label: 'UNDO',
+          onPressed: () {
+            setState(() {
+              _playerList = playerList;
+            });
+            localStorage.writeFile(toJson(_playerList));
+          }),
+    ));
+
     setState(() => _playerList.removeAt(index));
     localStorage.writeFile(toJson(_playerList));
   }
@@ -254,8 +255,10 @@ class PlayerPageState extends State<PlayerPage> {
                 new FlatButton(
                     child: new Text('REMOVE'),
                     onPressed: () {
-                      _removeItem(index);
+
                       Navigator.of(context).pop();
+                      _removeItem(index);
+
                     })
               ]);
         });

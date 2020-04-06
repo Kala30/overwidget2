@@ -71,29 +71,32 @@ class NewsPageState extends State<NewsPage> {
 
   Widget buildHome() {
     return new Scaffold(
-        appBar: new AppBar(title: new Text('OverWidget', style: TextStyle(fontFamily: 'GoogleSans', color: Theme.of(context).accentColor) ), actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: (String result) {
-              switch (result) {
-                case 'darkTheme':
-                  widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem(
-                  value: 'darkTheme',
-                  child: IgnorePointer(child: SwitchListTile(
-                      dense: true,
-                      title: Text("Dark Theme"),
-                      value: prefs.getBool('darkTheme'),
-                      onChanged: (value) {},
-                      activeColor: Theme.of(context).accentColor
-                  ))
+        appBar: new AppBar(
+            title: new Text('OverWidget', style: TextStyle(fontFamily: 'GoogleSans', color: Theme.of(context).accentColor) ),
+            actions: <Widget>[
+              PopupMenuButton<String>(
+                onSelected: (String result) {
+                  switch (result) {
+                    case 'darkTheme':
+                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem(
+                      value: 'darkTheme',
+                      child: IgnorePointer(child: SwitchListTile(
+                          dense: true,
+                          title: Text("Dark Theme"),
+                          value: prefs.getBool('darkTheme'),
+                          onChanged: (value) {},
+                          activeColor: Theme.of(context).accentColor
+                      ))
+                  )
+                ],
               )
-            ],
-          )
-        ]),
+         ]
+        ),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
           scaffoldContext = context;
@@ -115,7 +118,7 @@ class NewsPageState extends State<NewsPage> {
               else if (index == 1)
                 return Padding(
                     padding: EdgeInsets.only(left: 12),
-                    child: Text('News', style: Theme.of(context).textTheme.headline5)
+                    child: Text('News', style: Theme.of(context).textTheme.title)
                 );
               else
                 return _buildItem(_newsList[index-2]);
