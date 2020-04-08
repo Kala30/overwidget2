@@ -159,34 +159,64 @@ class PlayerPageState extends State<PlayerPage> {
         onDismissed: (direction) {
           _removeItem(index);
         },
-        child: new ListTile(
-            title: new Text(player.name, style: TextStyle(fontSize: 18)),
-            leading: new Container(
-                height: 64,
-                width: 64,
-                child: new FadeInImage.memoryNetwork(
-                    placeholder: kTransparentImage,
-                    image: player.icon,
-                    fadeInDuration: Duration(milliseconds: 100),
-                    fit: BoxFit.contain)),
-            subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
-                style: TextStyle(fontSize: 16)),
-            trailing: new Column(children: <Widget>[
-              Container(
-                  height: 35,
-                  width: 35,
-                  child: player.ratingIcon != ''
-                      ? FadeInImage.memoryNetwork(
-                          placeholder: kTransparentImage,
-                          image: player.ratingIcon,
-                          fadeInDuration: Duration(milliseconds: 100))
-                      : Image.memory(kTransparentImage)),
-              Text(player.rating > 0 ? '${player.rating}' : '',
-                  style: TextStyle(fontSize: 14))
-            ]),
-            isThreeLine: true,
-            onLongPress: () => _promptRemoveItem(index),
-            onTap: () => _promptWeb(index)));
+        child: _buildTile(player, index));
+  }
+
+  Widget _buildTile(Player player, int index) {
+
+    ListTile listTile = new ListTile(
+        title: new Text(player.name, style: TextStyle(fontSize: 18)),
+        leading: new GestureDetector(
+          onTap: () => _promptWeb(index),
+          child: Container(
+            height: 64,
+            width: 64,
+            child: new FadeInImage.memoryNetwork(
+                placeholder: kTransparentImage,
+                image: player.icon,
+                fadeInDuration: Duration(milliseconds: 100),
+                fit: BoxFit.contain))
+        ),
+        subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
+            style: TextStyle(fontSize: 16)),
+        trailing: _buildSR(player.rating, player.ratingIcon),
+        isThreeLine: true,
+        //onLongPress: () => _promptRemoveItem(index),
+        //onTap: () => _promptWeb(index)
+    );
+
+    if (player.rating == 0) {
+      return listTile;
+    } else {
+      return ExpansionTile(
+        key: PageStorageKey<Player>(player),
+        title: listTile,
+        children: <Widget> [ Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget> [
+              _buildSR(player.tankRating, player.tankRatingIcon),
+              _buildSR(player.dpsRating, player.dpsRatingIcon),
+              _buildSR(player.supportRating, player.supportRatingIcon)
+            ]
+        )]
+      );
+    }
+  }
+
+  Widget _buildSR(int rating, String iconUrl) {
+    return new Column(children: <Widget>[
+      Container(
+          height: 35,
+          width: 35,
+          child: iconUrl != '' && iconUrl != null
+              ? FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage,
+              image: iconUrl,
+              fadeInDuration: Duration(milliseconds: 100))
+              : Image.memory(kTransparentImage)),
+      Text(rating != null && rating > 0 ? '${rating}' : '',
+          style: TextStyle(fontSize: 14))
+    ]);
   }
 
   void _addItem(String battletag, String platform, String region) async {
@@ -500,6 +530,31 @@ class PlayerPageState extends State<PlayerPage> {
             ..gamesWon = map['gamesWon']
             ..rating = map['rating']
             ..ratingIcon = map['ratingIcon'];
+
+          if (map['ratings'] != null) {
+            for (var role in map['ratings']) {
+              switch (role['role']) {
+                case 'tank':
+                  {
+                    player.tankRating = role['level'];
+                    player.tankRatingIcon = role['rankIcon'];
+                  }
+                  break;
+
+                case 'damage':
+                  {
+                    player.dpsRating = role['level'];
+                    player.dpsRatingIcon = role['rankIcon'];
+                  }
+                  break;
+                case 'support':
+                  {
+                    player.supportRating = role['level'];
+                    player.supportRatingIcon = role['rankIcon'];
+                  }
+              }
+            }
+          }
 
           if (index == -1) {
             _playerList.add(player);

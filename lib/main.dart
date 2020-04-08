@@ -12,9 +12,11 @@ import 'player_page.dart';
 import 'news_page.dart';
 import 'patch_page.dart';
 
-void main() async {
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(MainApp());
+void main() {
+  //SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+  //.then((_) {
+    runApp(MainApp());
+  //});
 }
 
 class MainApp extends StatelessWidget {
@@ -73,7 +75,7 @@ class HomeState extends State<Home> {
   Widget build(BuildContext context) {
 
     return new MaterialApp(
-      //debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         title: 'OverWidget',
         theme: isDarkTheme
             ? ThemeData(
