@@ -150,7 +150,7 @@ class NewsPageState extends State<NewsPage> {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 200, fit: BoxFit.cover)
+                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 200, fit: BoxFit.fitWidth)
                 ),
                 ListTile(
                     title: Text(news.title/*, style: TextStyle(fontSize: 18)*/),
@@ -172,7 +172,7 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Widget _buildFeaturedItem(News news) {
-    return Container(width: 240, child: Card(
+    return Container(width: 280, child: Card(
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.all(12),
         child: InkWell(

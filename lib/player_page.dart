@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:overwidget/player_detail_page.dart';
 import 'localstorage.dart';
 import 'player.dart';
 
@@ -164,43 +165,33 @@ class PlayerPageState extends State<PlayerPage> {
 
   Widget _buildTile(Player player, int index) {
 
-    ListTile listTile = new ListTile(
-        title: new Text(player.name, style: TextStyle(fontSize: 18)),
-        leading: new GestureDetector(
-          onTap: () => _promptWeb(index),
-          child: Container(
+    return new ListTile(
+        title: new Text(player.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        leading: new Container(
             height: 64,
             width: 64,
             child: new FadeInImage.memoryNetwork(
                 placeholder: kTransparentImage,
                 image: player.icon,
                 fadeInDuration: Duration(milliseconds: 100),
-                fit: BoxFit.contain))
+                fit: BoxFit.contain)
+          ),
+        subtitle: new Text(
+            'Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
+            style: TextStyle(fontSize: 16)
         ),
-        subtitle: new Text('Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
-            style: TextStyle(fontSize: 16)),
         trailing: _buildSR(player.rating, player.ratingIcon),
         isThreeLine: true,
-        //onLongPress: () => _promptRemoveItem(index),
+        onLongPress: () => _promptRemoveItem(index),
         //onTap: () => _promptWeb(index)
+        onTap: () {
+          Navigator.push(
+            context,
+            new MaterialPageRoute(builder: (context) => new PlayerDetailPage(player: player)),
+          );
+        }
     );
 
-    if (player.rating == 0) {
-      return listTile;
-    } else {
-      return ExpansionTile(
-        key: PageStorageKey<Player>(player),
-        title: listTile,
-        children: <Widget> [ Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget> [
-              _buildSR(player.tankRating, player.tankRatingIcon),
-              _buildSR(player.dpsRating, player.dpsRatingIcon),
-              _buildSR(player.supportRating, player.supportRatingIcon)
-            ]
-        )]
-      );
-    }
   }
 
   Widget _buildSR(int rating, String iconUrl) {
