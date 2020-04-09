@@ -130,6 +130,7 @@ class NewsPageState extends State<NewsPage> {
     return SizedBox(
       height: 280,
       child: ListView.builder(
+          key: PageStorageKey<String>('featuredList'),
           scrollDirection: Axis.horizontal,
           itemCount: _featuredList.length,
           itemBuilder: (context, index) {
