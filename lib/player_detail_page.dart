@@ -27,7 +27,8 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   bool _isLoading = true;
   bool _profIsPrivate = false;
 
-  BuildContext _scaffoldContext;
+  final List<String> _tabs = ['OVERVIEW', 'QUICK PLAY', 'COMPETITIVE'];
+
   final Player player;
   PlayerDetail _playerDetail;
 
@@ -39,87 +40,141 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return DefaultTabController(
-      length: 3,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-              floating: false,
-              pinned: true,
-              expandedHeight: 200,
-              elevation: 0,
-              flexibleSpace: FlexibleSpaceBar(
+      length: _tabs.length, // This is the number of tabs.
+      child: NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          // These are the slivers that show up in the "outer" scroll view.
+          return <Widget>[
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              child: SliverAppBar(
+                pinned: true,
+                expandedHeight: 220.0,
+                elevation: 0,
+                //forceElevated: innerBoxIsScrolled, // elevated when scrolled
+                flexibleSpace: FlexibleSpaceBar(
                   title: Text(player.name,
-                      style: TextStyle(fontFamily: 'GoogleSans')),
+                    style: TextStyle(fontFamily: 'GoogleSans')),
                   centerTitle: true,
                   collapseMode: CollapseMode.pin,
                   background: Container(
-                      alignment: Alignment.center,
-                      child: Container(
-                          width: 84,
-                          height: 84,
-                          child: CircleAvatar(backgroundImage: NetworkImage(player.icon)))))
+                    alignment: Alignment.center,
+                    child: Container(
+                    width: 84,
+                    height: 84,
+                    child: CircleAvatar(backgroundImage: NetworkImage(player.icon)))
+                  )
+                )
               ),
-          SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverTabBarDelegate(TabBar(
-                labelColor: Theme.of(context).accentColor,
-                labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-                unselectedLabelColor: Theme.of(context).hintColor,
-                tabs: <Widget>[
-                  Tab(text: 'OVERVIEW'),
-                  Tab(text: 'QUICK PLAY'),
-                  Tab(text: 'COMPETITIVE')
-                ],
-              ))),
-          SliverFillRemaining(
-              child: new Builder(builder: (BuildContext context) {
-            if (_isLoading)
-              return new Center(child: new CircularProgressIndicator());
-            else if (_profIsPrivate)
-              return new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.lock,
-                      size: 48,
-                    ),
-                    Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Private Profile',
-                          style: TextStyle(color: Theme.of(context).hintColor))
-                    )
-                  ]);
-            else
-              return _buildContent();
-          }))
-        ],
+            ),
+            SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverTabBarDelegate(TabBar(
+                  labelColor: Theme.of(context).accentColor,
+                  labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                  unselectedLabelColor: Theme.of(context).hintColor,
+                  tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                ))),
+          ];
+        },
+        body: TabBarView(
+          children: _tabs.map((String name) {
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Builder(
+                builder: (BuildContext context) { // need Builder for context
+                  return CustomScrollView(
+                    // Remember scroll position when
+                    // the tab view is not on the screen
+                    key: PageStorageKey<String>(name),
+                    slivers: <Widget>[
+                      SliverOverlapInjector(
+                        // This is the flip side of the SliverOverlapAbsorber above.
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.all(12),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate(_buildContentList(name)),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 
-  Widget _buildContent() {
-    return TabBarView(
-      children: <Widget>[
-        _overviewTab(),
-        _buildHeroList(_playerDetail.qpHeroes),
-        _buildHeroList(_playerDetail.compHeroes)
-    ]);
+  List<Widget> _buildContentList(String key) {
+    // Loading
+    if (_isLoading)
+      return <Widget> [ Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(child: new CircularProgressIndicator())
+      )];
+    // Private
+    else if (_profIsPrivate) {
+      return <Widget>[ Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 32),
+              child: Icon(Icons.lock, size: 48,)
+            ),
+            Padding(
+                padding: EdgeInsets.all(8),
+                child: Text('Private Profile',
+                    style: TextStyle(color: Theme
+                        .of(context)
+                        .hintColor))
+            )
+          ])
+      ];
+    } else {
+      if (key == _tabs[1])
+        return _buildHeroList(_playerDetail.qpHeroes);
+      else if (key == _tabs[2])
+        return _buildHeroList(_playerDetail.compHeroes);
+      else
+        return _overviewList();
+    }
   }
 
-  Widget _overviewTab() {
-    return Padding(
-        padding: EdgeInsets.only(top: 24, bottom: 24),
-        child: Column(children: <Widget>[
+  List<Widget> _overviewList() {
+    return  <Widget>[
           _buildSrRow(),
+      Card(
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                
+                Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      _buildItem(player.level.toString(), 'Level'),
+                      _buildItem(player.gamesWon.toString(), 'Games Won'),
+                      _buildItem(player.endorsement.toString(), 'Endorsement')
+                    ]),
+                
+              ])),
           Card(
-              margin: EdgeInsets.only(left: 12, right: 12, top: 32, bottom: 12),
               child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  //mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+
                     Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text('Quick Play')),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           _buildItem(_playerDetail.qpGamesPlayed.toString(), 'Games Played'),
@@ -130,27 +185,33 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                     Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text('Competitive')),
                     Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
+                          _buildItem(_playerDetail.compWinRate.toString()+'%', 'Win Rate'),
                           _buildItem(_playerDetail.compGamesPlayed.toString(), 'Games Played'),
                           _buildItem(_playerDetail.compGamesWon.toString(), 'Games Won'),
+
+                    ]),
+                    Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
                           _buildItem(_playerDetail.compTimePlayed.toString(), 'Time Played')
-                    ]
-                )
+                        ]),
+
               ]))
-        ]));
+        ];
   }
 
-  Widget _buildHeroList(List<OwHero> heroList) {
-    /*List<Widget> widgets = [];
+  List<Widget> _buildHeroList(List<OwHero> heroList) {
+    List<Widget> widgets = [];
+    heroList.sort((a, b) {
+      return b.compareTo(a);
+    });
     for (OwHero hero in heroList) {
       widgets.add(_buildHeroCard(hero));
     }
-    return Column(children: widgets);*/
-    return ListView.builder(
-        itemBuilder: (context, index) {
-          return _buildHeroCard(heroList[index]);
-        }
-    );
+    return widgets;
   }
 
   Widget _buildHeroCard(OwHero hero) {
@@ -158,13 +219,38 @@ class PlayerDetailState extends State<PlayerDetailPage> {
       margin: EdgeInsets.all(12),
       child: Padding(
         padding: EdgeInsets.all(12),
-        child: Text(hero.name)
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+
+              Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text(hero.fixName())),
+              Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    _buildItem(hero.fixTime(), 'Time Played'),
+                    _buildItem(hero.winPercentage.toString()+'%', 'Win Rate'),
+                    _buildItem(hero.gamesWon.toString(), 'Games Won')
+                  ]
+              ),
+              Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    _buildItem(hero.weaponAccuracy.toString()+'%', 'Weapon Acc'),
+                    _buildItem(hero.eliminationsPerLife.toString(), 'Elims/Life'),
+                    _buildItem(hero.objectiveKills.toString(), 'Obj Kills')
+                  ]
+              )
+
+            ])
       )
     );
   }
 
   Widget _buildItem(String title, String subtitle) {
-    return Expanded(child: Column(
+    return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
           Padding(
@@ -175,7 +261,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
               child: Text(subtitle,
                   style: TextStyle(
                       fontSize: 12, color: Theme.of(context).hintColor)))
-        ]));
+        ]);
   }
 
   Widget _buildSrRow() {
@@ -189,8 +275,10 @@ class PlayerDetailState extends State<PlayerDetailPage> {
       ratings.add(
           _buildSR(player.supportRating, player.supportRatingIcon, 'SUPPORT'));
 
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: ratings);
+    return Padding(
+        padding: EdgeInsets.only(top: 12, bottom: 24),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: ratings)
+    );
   }
 
   Widget _buildSR(int rating, String iconUrl, String role) {
@@ -214,7 +302,6 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   Future<void> _fetchData(Player player) async {
     String battletag = player.name;
     String platform = player.platform;
-    String region = player.region;
 
     setState(() {
       _isLoading = true;
@@ -239,13 +326,14 @@ class PlayerDetailState extends State<PlayerDetailPage> {
         } else if (map['name'] != null) {
           // Public Profile
 
-          _playerDetail = new PlayerDetail()
-            ..compGamesPlayed = map['competitiveStats']['games']['played']
-            ..compGamesWon = map['competitiveStats']['games']['won']
-            ..compTimePlayed = map['competitiveStats']['careerStats']['allHeroes']['game']['timePlayed']
-            ..qpGamesPlayed = map['quickPlayStats']['games']['played']
-            ..qpGamesWon = map['quickPlayStats']['games']['won']
-            ..qpTimePlayed = map['quickPlayStats']['careerStats']['allHeroes']['game']['timePlayed'];
+          _playerDetail = new PlayerDetail(
+            compGamesPlayed: map['competitiveStats']['games']['played'],
+            compGamesWon: map['competitiveStats']['games']['won'],
+            compTimePlayed: map['competitiveStats']['careerStats']['allHeroes']['game']['timePlayed'],
+            qpGamesPlayed: map['quickPlayStats']['games']['played'],
+            qpGamesWon: map['quickPlayStats']['games']['won'],
+            qpTimePlayed: map['quickPlayStats']['careerStats']['allHeroes']['game']['timePlayed']
+          );
 
           if (map['quickPlayStats']['topHeroes'] != null) {
             map['quickPlayStats']['topHeroes'].forEach((key, value) {
