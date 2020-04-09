@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:overwidget/player_detail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'dart:convert';
 
@@ -49,10 +50,11 @@ class PlayerDetailState extends State<PlayerDetailPage> {
           return <Widget>[
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              child: SliverAppBar(
+              sliver: SliverAppBar(
                 pinned: true,
-                expandedHeight: 220.0,
+                expandedHeight: 200.0,
                 elevation: 0,
+                actions: <Widget>[IconButton(icon: Icon(Icons.open_in_new), onPressed: _promptWeb)],
                 //forceElevated: innerBoxIsScrolled, // elevated when scrolled
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(player.name,
@@ -298,6 +300,94 @@ class PlayerDetailState extends State<PlayerDetailPage> {
           style: Theme.of(context).textTheme.headline5),
     ]);
   }
+
+
+  void _promptWeb() {
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new SimpleDialog(
+              title: new Text('Open in Browser'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+              children: <Widget>[
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://playoverwatch.com/career/${player.platform}/${player.name.replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: Row(children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.open_in_new)),
+                      Text('PlayOverwatch')
+                    ])),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://overbuff.com/players/${player.platform}/${player.name.replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: Row(children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.open_in_new)),
+                      Text('Overbuff')
+                    ])),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://overwatchtracker.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: Row(children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.open_in_new)),
+                      Text('Tracker Network')
+                    ])),
+                new SimpleDialogOption(
+                    onPressed: () {
+                      _launchURL(
+                          'https://masteroverwatch.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
+                      Navigator.pop(context);
+                    },
+                    child: Row(children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.open_in_new)),
+                      Text('Master Overwatch')
+                    ])),
+                Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
+                  child: FlatButton(
+                    textTheme: ButtonTextTheme.normal,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("CANCEL"),
+                  ),
+                )
+              ]);
+        });
+  }
+
+  void _launchURL(final String url) async {
+    try {
+      await launch(url,
+          option: new CustomTabsOption(
+            toolbarColor: Theme.of(context).primaryColor,
+            enableDefaultShare: true,
+            enableUrlBarHiding: true,
+            showPageTitle: true,
+          ));
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
 
   Future<void> _fetchData(Player player) async {
     String battletag = player.name;

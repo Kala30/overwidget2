@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:http/http.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
@@ -13,7 +14,7 @@ class Patch {
 }
 
 class PatchPage extends StatefulWidget {
-  Function setDarkTheme;
+  final Function setDarkTheme;
   PatchPage(this.setDarkTheme);
   @override
   createState() => new PatchPageState();
@@ -97,12 +98,14 @@ class PatchPageState extends State<PatchPage> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
-        child: ListView.builder(
+        child: _patchList.length > 0 ? ListView.builder(
             itemCount: _patchList.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) return _buildFeatured(_patchList[0]);
               return _buildItem(_patchList[index - 1]);
-            }));
+            })
+            : Center(child: Icon(Icons.error_outline, size: 48))
+    );
   }
 
   Widget _buildItem(Patch patch) {
@@ -123,7 +126,7 @@ class PatchPageState extends State<PatchPage> {
                 Padding(
                     padding: EdgeInsets.all(16),
                     child: Align(
-                        child: Text('Latest', style: Theme.of(context).textTheme.title),
+                        child: Text('Latest', style: Theme.of(context).textTheme.headline5),
                         alignment: Alignment.centerLeft
                     )
                 ),

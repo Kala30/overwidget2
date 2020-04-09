@@ -7,14 +7,13 @@ import 'package:overwidget/player_detail_page.dart';
 import 'localstorage.dart';
 import 'player.dart';
 
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 LocalStorage localStorage = new LocalStorage();
 
 class PlayerPage extends StatefulWidget {
-  Function setDarkTheme;
+  final Function setDarkTheme;
   PlayerPage(this.setDarkTheme);
   @override
   createState() => new PlayerPageState();
@@ -164,23 +163,22 @@ class PlayerPageState extends State<PlayerPage> {
   }
 
   Widget _buildTile(Player player, int index) {
-
     return new ListTile(
-        title: new Text(player.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        title: new Text(player.name,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         leading: Container(
-          width: 64,
+            width: 64,
             height: 64,
             alignment: Alignment.center,
             child: Container(
                 width: 58,
                 height: 58,
-                child: CircleAvatar(backgroundImage: NetworkImage(player.icon))
-            )
-        ),
+                child:
+                    CircleAvatar(backgroundImage: NetworkImage(player.icon)))),
         subtitle: new Text(
-            'Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
-            style: TextStyle(fontSize: 16)
-        ),
+            'Level ${player.level}\n' +
+                (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
+            style: TextStyle(fontSize: 16)),
         trailing: _buildSR(player.rating, player.ratingIcon),
         isThreeLine: true,
         onLongPress: () => _promptRemoveItem(index),
@@ -188,11 +186,11 @@ class PlayerPageState extends State<PlayerPage> {
         onTap: () {
           Navigator.push(
             context,
-            new MaterialPageRoute(builder: (context) => Scaffold(body: PlayerDetailPage(player: player)) ),
+            new MaterialPageRoute(
+                builder: (context) =>
+                    Scaffold(body: PlayerDetailPage(player: player))),
           );
-        }
-    );
-
+        });
   }
 
   Widget _buildSR(int rating, String iconUrl) {
@@ -202,14 +200,12 @@ class PlayerPageState extends State<PlayerPage> {
           width: 35,
           child: iconUrl != '' && iconUrl != null
               ? FadeInImage.memoryNetwork(
-              placeholder: kTransparentImage,
-              image: iconUrl,
-              fadeInDuration: Duration(milliseconds: 100))
-              : Image.memory(kTransparentImage)
-      ),
-      Text(rating != null && rating > 0 ? '${rating}' : '',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
-      )
+                  placeholder: kTransparentImage,
+                  image: iconUrl,
+                  fadeInDuration: Duration(milliseconds: 100))
+              : Image.memory(kTransparentImage)),
+      Text(rating != null && rating > 0 ? '$rating' : '',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
     ]);
   }
 
@@ -222,7 +218,6 @@ class PlayerPageState extends State<PlayerPage> {
   }
 
   void _removeItem(int index) {
-
     List<Player> playerList = new List.from(_playerList);
     Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
       content: Text("Removed ${_playerList[index].name}"),
@@ -289,155 +284,76 @@ class PlayerPageState extends State<PlayerPage> {
   }
 
   void _promptAddItem() {
-    String platform = "pc";
+    String platform = 'pc';
     String battletag;
     if (!_isBusy) {
       showDialog(
           context: scaffoldContext,
           builder: (BuildContext context) {
-            return Theme(
-                data: new ThemeData(
-                    brightness: Theme.of(context).brightness,
-                    primaryColor: Theme.of(context).accentColor,
-                    primaryColorDark: Theme.of(context).accentColor,
-                    accentColor: Theme.of(context).accentColor
-                ),
-                child: new AlertDialog(
-                    title: new Text('Add player'),
-                    content: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          Expanded(
-                              child: new TextField(
-                            autofocus: true,
-                            //controller: inputController,
-                            onChanged: (String value) {
-                              battletag = value;
-                            },
-                            keyboardAppearance: prefs.getBool('darkTheme')
-                                ? Brightness.dark
-                                : Brightness.light,
-                            decoration: new InputDecoration(
-                                labelText: 'Username',
-                                hintText: 'Battletag#1234'),
-                          )),
-                          DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                            items: [
-                              DropdownMenuItem(value: "pc", child: Text("PC")),
-                              DropdownMenuItem(value: "psn", child: Text("PS4")),
-                              DropdownMenuItem(value: "xbl", child: Text("Xbox")),
-                              DropdownMenuItem(value: "nintendo-switch", child: Text("Switch"))
-                            ],
-                            value: platform,
-                            onChanged: (var text) {
-                              setState(() {
-                                platform = text;
-                              });
-                            },
-                          ))
-                        ]),
-                    actions: <Widget>[
-                      new FlatButton(
-                          textTheme: ButtonTextTheme.normal,
-                          child: new Text('CANCEL'),
-                          onPressed: () => Navigator.of(context).pop()),
-                      new FlatButton(
-                          //textTheme: ButtonTextTheme.accent,
-                          child: new Text('ADD'),
-                          textTheme: ButtonTextTheme.accent,
-                          onPressed: () {
-                            _addItem(battletag, platform, "us");
-                            Navigator.pop(context);
-                          })
-                    ]));
+            return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+              return Theme(
+                  data: new ThemeData(
+                      brightness: Theme.of(context).brightness,
+                      primaryColor: Theme.of(context).accentColor,
+                      primaryColorDark: Theme.of(context).accentColor,
+                      accentColor: Theme.of(context).accentColor),
+                  child: new AlertDialog(
+                      title: new Text('Add player'),
+                      content: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Expanded(
+                                child: new TextField(
+                              autofocus: true,
+                              //controller: inputController,
+                              onChanged: (String value) {
+                                battletag = value;
+                              },
+                              keyboardAppearance: prefs.getBool('darkTheme')
+                                  ? Brightness.dark
+                                  : Brightness.light,
+                              decoration: new InputDecoration(
+                                  labelText: 'Username',
+                                  hintText: 'Battletag#1234'),
+                            )),
+                            DropdownButtonHideUnderline(
+                                child: DropdownButton(
+                              items: [
+                                DropdownMenuItem(
+                                    value: "pc", child: Text("PC")),
+                                DropdownMenuItem(
+                                    value: "psn", child: Text("PS4")),
+                                DropdownMenuItem(
+                                    value: "xbl", child: Text("Xbox")),
+                                DropdownMenuItem(
+                                    value: "nintendo-switch",
+                                    child: Text("Switch"))
+                              ],
+                              value: platform,
+                              onChanged: (var text) {
+                                setState(() {
+                                  platform = text;
+                                });
+                              },
+                            ))
+                          ]),
+                      actions: <Widget>[
+                        new FlatButton(
+                            textTheme: ButtonTextTheme.normal,
+                            child: new Text('CANCEL'),
+                            onPressed: () => Navigator.of(context).pop()),
+                        new FlatButton(
+                            //textTheme: ButtonTextTheme.accent,
+                            child: new Text('ADD'),
+                            textTheme: ButtonTextTheme.accent,
+                            onPressed: () {
+                              _addItem(battletag, platform, "us");
+                              Navigator.pop(context);
+                            })
+                      ]));
+            });
           });
-    }
-  }
-
-  void _promptWeb(int index) {
-    Player player = _playerList[index];
-    showDialog(
-        context: scaffoldContext,
-        builder: (BuildContext context) {
-          return new SimpleDialog(
-              title: new Text('Open in Browser'),
-              contentPadding: EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
-              children: <Widget>[
-                new SimpleDialogOption(
-                    onPressed: () {
-                      _launchURL(
-                          'https://playoverwatch.com/career/${player.platform}/${player.name.replaceAll('#', '-')}');
-                      Navigator.pop(context);
-                    },
-                    child: Row(children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Icon(Icons.open_in_new)),
-                      Text('PlayOverwatch')
-                    ])),
-                new SimpleDialogOption(
-                    onPressed: () {
-                      _launchURL(
-                          'https://overbuff.com/players/${player.platform}/${player.name.replaceAll('#', '-')}');
-                      Navigator.pop(context);
-                    },
-                    child: Row(children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Icon(Icons.open_in_new)),
-                      Text('Overbuff')
-                    ])),
-                new SimpleDialogOption(
-                    onPressed: () {
-                      _launchURL(
-                          'https://overwatchtracker.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
-                      Navigator.pop(context);
-                    },
-                    child: Row(children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Icon(Icons.open_in_new)),
-                      Text('Tracker Network')
-                    ])),
-                new SimpleDialogOption(
-                    onPressed: () {
-                      _launchURL(
-                          'https://masteroverwatch.com/profile/${player.platform}/global/${player.name.replaceAll('#', '-')}');
-                      Navigator.pop(context);
-                    },
-                    child: Row(children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Icon(Icons.open_in_new)),
-                      Text('Master Overwatch')
-                    ])),
-                Container(
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
-                  child: FlatButton(
-                    textTheme: ButtonTextTheme.normal,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("CANCEL"),
-                  ),
-                )
-              ]);
-        });
-  }
-
-  void _launchURL(final String url) async {
-    try {
-      await launch(url,
-          option: new CustomTabsOption(
-            toolbarColor: Theme.of(scaffoldContext).primaryColor,
-            enableDefaultShare: true,
-            enableUrlBarHiding: true,
-            showPageTitle: true,
-          ));
-    } catch (e) {
-      debugPrint(e.toString());
     }
   }
 
@@ -505,7 +421,8 @@ class PlayerPageState extends State<PlayerPage> {
 
     try {
       String url;
-      url = "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
+      url =
+          "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
 
       final response = await http.get(url);
 

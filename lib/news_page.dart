@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
@@ -20,7 +19,7 @@ class News {
 }
 
 class NewsPage extends StatefulWidget {
-  Function setDarkTheme;
+  final Function setDarkTheme;
   NewsPage(this.setDarkTheme);
   @override
   createState() => new NewsPageState();
@@ -99,8 +98,11 @@ class NewsPageState extends State<NewsPage> {
         ),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
-          return _isLoading ? new Center(child: new CircularProgressIndicator())
-              : _buildList();
+          if (_isLoading)
+            return Center(child: new CircularProgressIndicator());
+          if (_newsList.length <= 0 )
+            return Center(child: Icon(Icons.error_outline, size: 48));
+          return _buildList();
         })
     );
   }
@@ -117,7 +119,7 @@ class NewsPageState extends State<NewsPage> {
               else if (index == 1)
                 return Padding(
                     padding: EdgeInsets.only(left: 12),
-                    child: Text('News', style: Theme.of(context).textTheme.title)
+                    child: Text('News', style: Theme.of(context).textTheme.headline5)
                 );
               else
                 return _buildItem(_newsList[index-2]);
@@ -150,7 +152,7 @@ class NewsPageState extends State<NewsPage> {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 200, fit: BoxFit.fitWidth)
+                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 180, fit: BoxFit.cover)
                 ),
                 ListTile(
                     title: Text(news.title/*, style: TextStyle(fontSize: 18)*/),

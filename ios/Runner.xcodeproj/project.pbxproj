@@ -54,6 +54,20 @@
 			remoteGlobalIDString = A5B0ECE2AFF1BE637975B637DC75A6ED;
 			remoteInfo = url_launcher;
 		};
+		D7B39C7C243F223A00DE55FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A3A80BA70CFB7F75C5391BEBBBA8C9DA;
+			remoteInfo = FMDB;
+		};
+		D7B39C7E243F223A00DE55FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C6F7AAD2203DC62007F75C2 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B799BFFEC5B11F90F501202080A57F37;
+			remoteInfo = sqflite;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -107,9 +121,11 @@
 			isa = PBXGroup;
 			children = (
 				3C6F7AB62203DC62007F75C2 /* libflutter_custom_tabs.a */,
+				D7B39C7D243F223A00DE55FD /* libFMDB.a */,
 				3C6F7AB82203DC62007F75C2 /* libpath_provider.a */,
 				3C6F7ABA2203DC62007F75C2 /* libPods-Runner.a */,
 				3C6F7ABC2203DC62007F75C2 /* libshared_preferences.a */,
+				D7B39C7F243F223A00DE55FD /* libsqflite.a */,
 				3C6F7ABE2203DC62007F75C2 /* liburl_launcher.a */,
 			);
 			name = Products;
@@ -290,6 +306,20 @@
 			remoteRef = 3C6F7ABD2203DC62007F75C2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		D7B39C7D243F223A00DE55FD /* libFMDB.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFMDB.a;
+			remoteRef = D7B39C7C243F223A00DE55FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D7B39C7F243F223A00DE55FD /* libsqflite.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libsqflite.a;
+			remoteRef = D7B39C7E243F223A00DE55FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -460,7 +490,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 34B7UGYY98;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -473,6 +503,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
+				MARKETING_VERSION = 0.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cogentworks.overwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -590,7 +621,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 34B7UGYY98;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -603,6 +634,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
+				MARKETING_VERSION = 0.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cogentworks.overwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -618,7 +650,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 34B7UGYY98;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -631,6 +663,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
+				MARKETING_VERSION = 0.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cogentworks.overwidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

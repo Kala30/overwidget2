@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:transparent_image/transparent_image.dart';
 
-import 'localstorage.dart';
-import 'player.dart';
 import 'player_page.dart';
 import 'news_page.dart';
 import 'patch_page.dart';
