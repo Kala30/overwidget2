@@ -167,15 +167,16 @@ class PlayerPageState extends State<PlayerPage> {
 
     return new ListTile(
         title: new Text(player.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-        leading: new Container(
+        leading: Container(
+          width: 64,
             height: 64,
-            width: 64,
-            child: new FadeInImage.memoryNetwork(
-                placeholder: kTransparentImage,
-                image: player.icon,
-                fadeInDuration: Duration(milliseconds: 100),
-                fit: BoxFit.contain)
-          ),
+            alignment: Alignment.center,
+            child: Container(
+                width: 58,
+                height: 58,
+                child: CircleAvatar(backgroundImage: NetworkImage(player.icon))
+            )
+        ),
         subtitle: new Text(
             'Level ${player.level}\n' + (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
             style: TextStyle(fontSize: 16)
@@ -187,7 +188,7 @@ class PlayerPageState extends State<PlayerPage> {
         onTap: () {
           Navigator.push(
             context,
-            new MaterialPageRoute(builder: (context) => new PlayerDetailPage(player: player)),
+            new MaterialPageRoute(builder: (context) => Scaffold(body: PlayerDetailPage(player: player)) ),
           );
         }
     );
@@ -204,9 +205,11 @@ class PlayerPageState extends State<PlayerPage> {
               placeholder: kTransparentImage,
               image: iconUrl,
               fadeInDuration: Duration(milliseconds: 100))
-              : Image.memory(kTransparentImage)),
+              : Image.memory(kTransparentImage)
+      ),
       Text(rating != null && rating > 0 ? '${rating}' : '',
-          style: TextStyle(fontSize: 14))
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
+      )
     ]);
   }
 
@@ -271,15 +274,15 @@ class PlayerPageState extends State<PlayerPage> {
               title: new Text('Remove ${_playerList[index].name}?'),
               actions: <Widget>[
                 new FlatButton(
+                    textTheme: ButtonTextTheme.normal,
                     child: new Text('CANCEL'),
                     onPressed: () => Navigator.of(context).pop()),
                 new FlatButton(
+                    textTheme: ButtonTextTheme.accent,
                     child: new Text('REMOVE'),
                     onPressed: () {
-
                       Navigator.of(context).pop();
                       _removeItem(index);
-
                     })
               ]);
         });
@@ -322,10 +325,9 @@ class PlayerPageState extends State<PlayerPage> {
                               child: DropdownButton(
                             items: [
                               DropdownMenuItem(value: "pc", child: Text("PC")),
-                              DropdownMenuItem(
-                                  value: "psn", child: Text("PSN")),
-                              DropdownMenuItem(
-                                  value: "xbl", child: Text("XBL")),
+                              DropdownMenuItem(value: "psn", child: Text("PS4")),
+                              DropdownMenuItem(value: "xbl", child: Text("Xbox")),
+                              DropdownMenuItem(value: "nintendo-switch", child: Text("Switch"))
                             ],
                             value: platform,
                             onChanged: (var text) {
@@ -337,8 +339,8 @@ class PlayerPageState extends State<PlayerPage> {
                         ]),
                     actions: <Widget>[
                       new FlatButton(
+                          textTheme: ButtonTextTheme.normal,
                           child: new Text('CANCEL'),
-                          textTheme: ButtonTextTheme.accent,
                           onPressed: () => Navigator.of(context).pop()),
                       new FlatButton(
                           //textTheme: ButtonTextTheme.accent,
@@ -414,6 +416,7 @@ class PlayerPageState extends State<PlayerPage> {
                   alignment: Alignment.centerRight,
                   padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
                   child: FlatButton(
+                    textTheme: ButtonTextTheme.normal,
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -477,7 +480,7 @@ class PlayerPageState extends State<PlayerPage> {
                   alignment: Alignment.centerRight,
                   padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 4.0),
                   child: FlatButton(
-                    textTheme: ButtonTextTheme.accent,
+                    textTheme: ButtonTextTheme.normal,
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -502,13 +505,8 @@ class PlayerPageState extends State<PlayerPage> {
 
     try {
       String url;
-      if (platform == "xbl" || platform == "psn") {
-        url =
-            "https://ow-api.com/v1/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
-      } else {
-        url =
-            "https://ow-api.com/v1/stats/$platform/$region/${battletag.replaceAll('#', '-')}/profile";
-      }
+      url = "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
+
       final response = await http.get(url);
 
       if (response.statusCode == 200) {

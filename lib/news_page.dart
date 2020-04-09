@@ -99,7 +99,6 @@ class NewsPageState extends State<NewsPage> {
         ),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
-          scaffoldContext = context;
           return _isLoading ? new Center(child: new CircularProgressIndicator())
               : _buildList();
         })

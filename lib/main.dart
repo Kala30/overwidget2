@@ -13,10 +13,7 @@ import 'news_page.dart';
 import 'patch_page.dart';
 
 void main() {
-  //SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-  //.then((_) {
     runApp(MainApp());
-  //});
 }
 
 class MainApp extends StatelessWidget {
@@ -34,7 +31,7 @@ class Home extends StatefulWidget {
 }
 
 
-class HomeState extends State<Home> {
+class HomeState extends State<Home> with WidgetsBindingObserver {
 
   bool isDarkTheme = false;
   SharedPreferences prefs;
@@ -47,6 +44,21 @@ class HomeState extends State<Home> {
     _initTheme();
 
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state == AppLifecycleState.resumed){
+      setNavigationTheme();
+    }
   }
 
   _initTheme() async {
@@ -80,16 +92,24 @@ class HomeState extends State<Home> {
         theme: isDarkTheme
             ? ThemeData(
               brightness: Brightness.dark,
-              accentColor: Colors.red,)
+              primaryColor: Color(0xFF1F1F1F),
+              accentColor: Colors.redAccent,
+              scaffoldBackgroundColor: Color(0xFF121212),
+              cardColor: Color(0xFF1D1D1D),
+              floatingActionButtonTheme: FloatingActionButtonThemeData(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.grey[100]
+              ), navigationRailTheme: NavigationRailThemeData(backgroundColor: Color(0xFF1F1F1F))
+            )
             : ThemeData(
               primaryColor: Colors.white,
               primaryColorDark: Colors.grey[300],
-              accentColor: Colors.orange,
-              inputDecorationTheme: new InputDecorationTheme(
-                  labelStyle: new TextStyle(color: Colors.orange),
-                  border: new UnderlineInputBorder(
-                      borderSide: new BorderSide(
-                          color: Colors.orange, style: BorderStyle.solid)))),
+              accentColor: Colors.orangeAccent,
+              floatingActionButtonTheme: FloatingActionButtonThemeData(
+                backgroundColor: Colors.orangeAccent,
+                foregroundColor: Colors.grey[900]
+              ),
+        ),
         home: buildScaffold()
     );
   }
@@ -121,6 +141,7 @@ class HomeState extends State<Home> {
             )
           ],
           selectedItemColor: Theme.of(context).accentColor,
+          backgroundColor: Theme.of(context).cardColor,
         );
       }),
     );
@@ -147,7 +168,7 @@ class HomeState extends State<Home> {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     } else {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white,
+          systemNavigationBarColor: Colors.grey[200],
           systemNavigationBarIconBrightness: Brightness.dark));
     }
   }
