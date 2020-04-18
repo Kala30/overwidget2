@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:path/path.dart' as path;
 import 'dart:convert';
+import 'package:http/http.dart';
 
 import 'player.dart';
 
@@ -64,9 +65,17 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                   background: Container(
                     alignment: Alignment.center,
                     child: Container(
-                    width: 84,
-                    height: 84,
-                    child: CircleAvatar(backgroundImage: NetworkImage(player.icon)))
+                        height: 84,
+                        width: 84,
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: new FadeInImage.memoryNetwork(
+                                placeholder: kTransparentImage,
+                                image: player.icon,
+                                fadeInDuration: Duration(milliseconds: 100),
+                                fit: BoxFit.cover)
+                        )
+                    ),
                   )
                 )
               ),
@@ -153,6 +162,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     return  <Widget>[
           _buildSrRow(),
       Card(
+          margin: EdgeInsets.all(12),
           child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,6 +179,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                 
               ])),
           Card(
+            margin: EdgeInsets.all(12),
               child: Column(
                   //mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,13 +221,15 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     heroList.sort((a, b) {
       return b.compareTo(a);
     });
+
+    int maxHero = heroList[0].getDuration().inSeconds;
     for (OwHero hero in heroList) {
-      widgets.add(_buildHeroCard(hero));
+      widgets.add(_buildHeroCard(hero, hero.getDuration().inSeconds/maxHero));
     }
     return widgets;
   }
 
-  Widget _buildHeroCard(OwHero hero) {
+  /*Widget _buildHeroCard(OwHero hero) {
     return Card(
       margin: EdgeInsets.all(12),
       child: Padding(
@@ -248,6 +261,31 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
             ])
       )
+    );
+  }*/
+
+  Widget _buildHeroCard(OwHero hero, double percent) {
+    return Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.all(6),
+        child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.network(hero.getIconUrl(), height: 80,),
+              Expanded(child:
+                ListTile(
+                    title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Text(hero.fixName()), Text(hero.fixTime())]
+                    ),
+                    subtitle: LinearProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(hero.color),
+                      backgroundColor: Theme.of(context).splashColor,
+                      value: percent,
+            )
+          ))
+
+        ])
     );
   }
 
@@ -400,8 +438,11 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     try {
       String url;
       url = "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/complete";
-
       var fetchedFile = await CustomCacheManager().getSingleFile(url);
+
+      // Get hero colors from CSS
+      var client = Client();
+      Response colorResponse = await client.get('https://static.playoverwatch.com/app-53478582a8.css');
 
       if (fetchedFile != null) {
         var map = json.decode(await fetchedFile.readAsString());
@@ -429,6 +470,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
             map['quickPlayStats']['topHeroes'].forEach((key, value) {
               OwHero hero = OwHero.fromMap(value);
               hero.name = key;
+              hero.setColor(colorResponse.body);
               _playerDetail.qpHeroes.add(hero);
             });
           }
@@ -437,6 +479,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
             map['competitiveStats']['topHeroes'].forEach((key, value) {
               OwHero hero = OwHero.fromMap(value);
               hero.name = key;
+              hero.setColor(colorResponse.body);
               _playerDetail.compHeroes.add(hero);
             });
           }

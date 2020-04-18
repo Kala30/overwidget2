@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:convert';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'package:overwidget/player_detail_page.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'localstorage.dart';
 import 'player.dart';
 
@@ -24,7 +26,7 @@ class PlayerPageState extends State<PlayerPage> {
   SharedPreferences prefs;
   List<Player> _playerList = [];
 
-  bool _isBusy;
+  bool _isBusy = true;
   int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -51,47 +53,35 @@ class PlayerPageState extends State<PlayerPage> {
     try {
       //localStorage.clearFile();
       String contents = await localStorage.readFile();
-      if (contents != null) _playerList = fromJson(contents);
-      //String contents = '[{"battletag":"Kala30#1473"}]';
+      if (contents != null)
+        _playerList = fromJson(contents);
+
 
       setState(() {});
 
-      //await _refreshList();
-      _refreshIndicatorKey.currentState.show();
+      await _refreshIndicatorKey.currentState.show();
+      setState(() {
+        _isBusy = false;
+      });
+
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
   }
 
   Future<void> _refreshList() async {
-    _isBusy = true;
 
-    /*var dataList = List.from(_playerList);
-    _playerList = [];
-
-    if (dataList == null || dataList.length == 0) {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }*/
+    setState(() {
+      _isBusy = true;
+    });
 
     for (int i = 0; i < _playerList.length; i++) {
       await _fetchData(_playerList[i], alwaysAdd: true, index: i);
     }
 
-    _isBusy = false;
-
-    /*Player testPlayer = new Player("B.O.B.", "pc", "us")
-      ..level = 100
-      ..icon = "https://d15f34w2p8l1cc.cloudfront.net/overwatch/efb3fa31f0c7a141928da914bc566753aaeb80c07067c10ee8d9a52ed28e4176.png"
-      ..endorsement = 4
-      ..gamesWon = 2
-      ..rating = 4000
-      ..ratingIcon = "https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png";
-
-
-    _fetchData(testPlayer, alwaysAdd: true);*/
+    setState(() {
+      _isBusy = false;
+    });
   }
 
   @override
@@ -144,22 +134,42 @@ class PlayerPageState extends State<PlayerPage> {
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
         child: ListView.builder(
-            itemCount: _playerList.length,
+            itemCount: _playerList.length + 1,
             itemBuilder: (context, index) {
+              if (index >= _playerList.length)
+                return Container(height: 64);
               return _buildItem(_playerList[index], index);
             }));
   }
 
   Widget _buildItem(Player player, int index) {
-    return Dismissible(
-        background: Container(
-          color: Colors.red,
-        ),
-        key: Key(_playerList[index].name),
-        onDismissed: (direction) {
-          _removeItem(index);
-        },
-        child: _buildTile(player, index));
+    return AbsorbPointer(
+      absorbing: _isBusy,
+        child: Dismissible(
+            background: Container(
+                color: Colors.red,
+              alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                    child: Icon(Icons.delete, size: 36)
+                )
+              ),
+            secondaryBackground: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+                child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Icon(Icons.delete, size: 36)
+                )
+            ),
+            key: Key(_playerList[index].name),
+            direction: DismissDirection.horizontal,
+            onDismissed: (direction) {
+              _removeItem(index);
+              },
+            child: _buildTile(player, index)
+        )
+    );
   }
 
   Widget _buildTile(Player player, int index) {
@@ -167,14 +177,17 @@ class PlayerPageState extends State<PlayerPage> {
         title: new Text(player.name,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         leading: Container(
-            width: 64,
-            height: 64,
-            alignment: Alignment.center,
-            child: Container(
-                width: 58,
-                height: 58,
-                child:
-                    CircleAvatar(backgroundImage: NetworkImage(player.icon)))),
+            height: 54,
+            width: 54,
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: new FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: player.icon,
+                    fadeInDuration: Duration(milliseconds: 100),
+                    fit: BoxFit.cover)
+            )
+        ),
         subtitle: new Text(
             'Level ${player.level}\n' +
                 (player.gamesWon > 0 ? '${player.gamesWon} games won' : ''),
@@ -286,6 +299,7 @@ class PlayerPageState extends State<PlayerPage> {
   void _promptAddItem() {
     String platform = 'pc';
     String battletag;
+
     if (!_isBusy) {
       showDialog(
           context: scaffoldContext,
@@ -424,10 +438,10 @@ class PlayerPageState extends State<PlayerPage> {
       url =
           "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
 
-      final response = await http.get(url);
+      var fetchedFile = await CustomCacheManager().getSingleFile(url);
 
-      if (response.statusCode == 200) {
-        var map = json.decode(response.body);
+      if (fetchedFile != null) {
+        var map = json.decode(await fetchedFile.readAsString());
         if (map['name'] != null) {
           Player player = new Player(map['name'], platform, region)
             ..level = map['prestige'] * 100 + map['level']
@@ -497,4 +511,29 @@ class PlayerPageState extends State<PlayerPage> {
     }
     setState(() {});
   }
+}
+
+class CustomCacheManager extends BaseCacheManager {
+
+  static const key = "playerCache";
+
+  static CustomCacheManager _instance;
+
+  factory CustomCacheManager() {
+    if (_instance == null) {
+      _instance = new CustomCacheManager._();
+    }
+    return _instance;
+  }
+
+  CustomCacheManager._() : super(key,
+      maxAgeCacheObject: Duration(minutes: 10),
+      maxNrOfCacheObjects: 20);
+
+  @override
+  Future<String> getFilePath() async {
+    var directory = await getTemporaryDirectory();
+    return path.join(directory.path, key);
+  }
+
 }
