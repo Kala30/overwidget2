@@ -68,7 +68,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                         height: 84,
                         width: 84,
                         child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(4),
                             child: new FadeInImage.memoryNetwork(
                                 placeholder: kTransparentImage,
                                 image: player.icon,
@@ -271,20 +271,26 @@ class PlayerDetailState extends State<PlayerDetailPage> {
         child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.network(hero.getIconUrl(), height: 80,),
+              Image.network(hero.getIconUrl(), height: 64,),
               Expanded(child:
-                ListTile(
-                    title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text(hero.fixName()), Text(hero.fixTime())]
-                    ),
-                    subtitle: LinearProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(hero.color),
-                      backgroundColor: Theme.of(context).splashColor,
-                      value: percent,
-            )
+                Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [Text(hero.fixName()), Text(hero.fixTime())]
+                          )),
+                      Padding(
+                          padding: EdgeInsets.only(left: 8, right: 8),
+                          child: LinearProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(hero.color),
+                              backgroundColor: Theme.of(context).splashColor,
+                              value: percent
+                          )
+                      )
+                    ]
           ))
-
         ])
     );
   }

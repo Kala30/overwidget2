@@ -121,6 +121,19 @@ class PlayerPageState extends State<PlayerPage> {
             ]),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
+          if (!_isBusy && _playerList.length==0) {
+            return Center(child:Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_circle, size: 48),
+                  Padding(
+                    child: Text("Tap '+' to add a player"),
+                    padding: EdgeInsets.all(12),
+                  )
+                ]
+            ));
+          }
           return _buildList();
         }),
         floatingActionButton: new FloatingActionButton(
@@ -180,7 +193,7 @@ class PlayerPageState extends State<PlayerPage> {
             height: 54,
             width: 54,
             child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(4),
                 child: new FadeInImage.memoryNetwork(
                     placeholder: kTransparentImage,
                     image: player.icon,
