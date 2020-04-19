@@ -41,6 +41,7 @@ class OwHero {
   int multiKillBest;
   int objectiveKills;
   Color color;
+  bool isComp; // competitive
 
   Duration getDuration() {
     var times = timePlayed.split(':');

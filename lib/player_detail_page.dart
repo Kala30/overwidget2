@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
+import 'package:overwidget/hero_detail_page.dart';
 import 'package:overwidget/player_detail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -265,33 +266,40 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   }*/
 
   Widget _buildHeroCard(OwHero hero, double percent) {
-    return Card(
-        clipBehavior: Clip.antiAlias,
-        margin: EdgeInsets.all(6),
-        child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.network(hero.getIconUrl(), height: 64,),
-              Expanded(child:
-                Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [Text(hero.fixName()), Text(hero.fixTime())]
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(left: 8, right: 8),
-                          child: LinearProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(hero.color),
-                              backgroundColor: Theme.of(context).splashColor,
-                              value: percent
-                          )
-                      )
-                    ]
-          ))
-        ])
+    return InkWell(
+        onTap: () {
+          Navigator.push(context, new MaterialPageRoute(
+              builder: (context) => HeroDetailPage(hero: hero, battletag: player.name, platform: player.platform)));
+          },
+        child: Card(
+            clipBehavior: Clip.antiAlias,
+            margin: EdgeInsets.all(6),
+            child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.network(hero.getIconUrl(), height: 64,),
+                  Expanded(child:
+                  Column(
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text(hero.fixName()), Text(hero.fixTime())]
+                            )
+                        ),
+                        Padding(
+                            padding: EdgeInsets.only(left: 8, right: 8),
+                            child: LinearProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(hero.color),
+                                backgroundColor: Theme.of(context).splashColor,
+                                value: percent
+                            )
+                        )
+                      ]
+                  ))
+                ])
+        )
     );
   }
 
@@ -474,8 +482,9 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
           if (map['quickPlayStats']['topHeroes'] != null) {
             map['quickPlayStats']['topHeroes'].forEach((key, value) {
-              OwHero hero = OwHero.fromMap(value);
-              hero.name = key;
+              OwHero hero = OwHero.fromMap(value)
+                ..name = key
+                ..isComp = false;
               hero.setColor(colorResponse.body);
               _playerDetail.qpHeroes.add(hero);
             });
@@ -483,8 +492,9 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
           if (map['competitiveStats']['topHeroes'] != null) {
             map['competitiveStats']['topHeroes'].forEach((key, value) {
-              OwHero hero = OwHero.fromMap(value);
-              hero.name = key;
+              OwHero hero = OwHero.fromMap(value)
+                ..name = key
+                ..isComp = true;
               hero.setColor(colorResponse.body);
               _playerDetail.compHeroes.add(hero);
             });
