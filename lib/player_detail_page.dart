@@ -165,61 +165,68 @@ class PlayerDetailState extends State<PlayerDetailPage> {
       _buildSrRow(),
       Card(
           margin: EdgeInsets.all(12),
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      _buildItem(player.level.toString(), 'Level'),
-                      _buildItem(player.gamesWon.toString(), 'Games Won'),
-                      _buildItem(player.endorsement.toString(), 'Endorsement')
-                    ]),
-              ])),
+          child: Padding(
+            padding: EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        _buildItem(player.level.toString(), 'Level'),
+                        _buildItem(player.gamesWon.toString(), 'Games Won'),
+                        _buildItem(player.endorsement.toString(), 'Endorsement')
+                      ]),
+                ])
+          )
+      ),
       Card(
           margin: EdgeInsets.all(12),
-          child: Column(
-              //mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                    padding: EdgeInsets.only(top: 12, left: 12),
-                    child: Text('Quick Play')),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _buildItem(_playerDetail.qpGamesPlayed.toString(),
-                          'Games Played'),
-                      _buildItem(
-                          _playerDetail.qpGamesWon.toString(), 'Games Won'),
-                      _buildItem(
-                          _playerDetail.qpTimePlayed.toString(), 'Time Played')
-                    ]),
-                Padding(
-                    padding: EdgeInsets.only(top: 12, left: 12),
-                    child: Text('Competitive')),
-                Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      _buildItem(_playerDetail.compWinRate.toString() + '%',
-                          'Win Rate'),
-                      _buildItem(_playerDetail.compGamesPlayed.toString(),
-                          'Games Played'),
-                      _buildItem(
-                          _playerDetail.compGamesWon.toString(), 'Games Won'),
-                    ]),
-                Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      _buildItem(_playerDetail.compTimePlayed.toString(),
-                          'Time Played')
-                    ]),
-              ]))
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(top: 12, left: 12),
+                      child: Text('Quick Play')),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _buildItem(_playerDetail.qpGamesPlayed.toString(),
+                            'Games Played'),
+                        _buildItem(
+                            _playerDetail.qpGamesWon.toString(), 'Games Won'),
+                        _buildItem(
+                            _playerDetail.qpTimePlayed.toString(), 'Time Played')
+                      ]),
+                  Padding(
+                      padding: EdgeInsets.only(top: 12, left: 12),
+                      child: Text('Competitive')),
+                  Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        _buildItem(_playerDetail.compWinRate.toString() + '%',
+                            'Win Rate'),
+                        _buildItem(_playerDetail.compGamesPlayed.toString(),
+                            'Games Played'),
+                        _buildItem(
+                            _playerDetail.compGamesWon.toString(), 'Games Won'),
+                      ]),
+                  Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        _buildItem(_playerDetail.compTimePlayed.toString(),
+                            'Time Played')
+                      ]),
+                ])
+          )
+      )
     ];
   }
 
@@ -236,40 +243,6 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     return widgets;
   }
 
-  /*Widget _buildHeroCard(OwHero hero) {
-    return Card(
-      margin: EdgeInsets.all(12),
-      child: Padding(
-        padding: EdgeInsets.all(12),
-        child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-
-              Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text(hero.fixName())),
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    _buildItem(hero.fixTime(), 'Time Played'),
-                    _buildItem(hero.winPercentage.toString()+'%', 'Win Rate'),
-                    _buildItem(hero.gamesWon.toString(), 'Games Won')
-                  ]
-              ),
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    _buildItem(hero.weaponAccuracy.toString()+'%', 'Weapon Acc'),
-                    _buildItem(hero.eliminationsPerLife.toString(), 'Elims/Life'),
-                    _buildItem(hero.objectiveKills.toString(), 'Obj Kills')
-                  ]
-              )
-
-            ])
-      )
-    );
-  }*/
 
   Widget _buildHeroCard(OwHero hero, double percent) {
     return Card(
@@ -311,7 +284,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   }
 
   Widget _buildItem(String title, String subtitle) {
-    return Column(
+    return Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
@@ -326,7 +299,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
               child: Text(subtitle,
                   style: TextStyle(
                       fontSize: 12, color: Theme.of(context).hintColor)))
-        ]);
+        ]));
   }
 
   Widget _buildSrRow() {
