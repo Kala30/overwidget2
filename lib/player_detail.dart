@@ -89,7 +89,11 @@ class OwHero {
   }
 
   String fixTime() {
-    return timePlayed.replaceAll(RegExp("^0+"), "");
+    String fixed = timePlayed.replaceAll(RegExp("^0+"), "");
+    if (fixed.length > 3)
+      return fixed;
+    // Add 0 in front if only seconds
+    return '0' + fixed;
   }
 
 

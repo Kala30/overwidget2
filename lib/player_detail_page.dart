@@ -43,7 +43,6 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return DefaultTabController(
       length: _tabs.length, // This is the number of tabs.
       child: NestedScrollView(
@@ -53,39 +52,39 @@ class PlayerDetailState extends State<PlayerDetailPage> {
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                pinned: true,
-                expandedHeight: 200.0,
-                elevation: 0,
-                actions: <Widget>[IconButton(icon: Icon(Icons.open_in_new), onPressed: _promptWeb)],
-                //forceElevated: innerBoxIsScrolled, // elevated when scrolled
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text(player.name,
-                    style: TextStyle(fontFamily: 'GoogleSans')),
-                  centerTitle: true,
-                  collapseMode: CollapseMode.pin,
-                  background: Container(
-                    alignment: Alignment.center,
-                    child: Container(
-                        height: 84,
-                        width: 84,
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: new FadeInImage.memoryNetwork(
-                                placeholder: kTransparentImage,
-                                image: player.icon,
-                                fadeInDuration: Duration(milliseconds: 100),
-                                fit: BoxFit.cover)
-                        )
-                    ),
-                  )
-                )
-              ),
+                  pinned: true,
+                  expandedHeight: 200.0,
+                  elevation: 0,
+                  actions: <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.open_in_new), onPressed: _promptWeb)
+                  ],
+                  //forceElevated: innerBoxIsScrolled, // elevated when scrolled
+                  flexibleSpace: FlexibleSpaceBar(
+                      title: Text(player.name,
+                          style: TextStyle(fontFamily: 'GoogleSans')),
+                      centerTitle: true,
+                      collapseMode: CollapseMode.pin,
+                      background: Container(
+                        alignment: Alignment.center,
+                        child: Container(
+                            height: 84,
+                            width: 84,
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: new FadeInImage.memoryNetwork(
+                                    placeholder: kTransparentImage,
+                                    image: player.icon,
+                                    fadeInDuration: Duration(milliseconds: 100),
+                                    fit: BoxFit.cover))),
+                      ))),
             ),
             SliverPersistentHeader(
                 pinned: true,
                 delegate: _SliverTabBarDelegate(TabBar(
                   labelColor: Theme.of(context).accentColor,
-                  labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                  labelStyle:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                   unselectedLabelColor: Theme.of(context).hintColor,
                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
                 ))),
@@ -97,7 +96,8 @@ class PlayerDetailState extends State<PlayerDetailPage> {
               top: false,
               bottom: false,
               child: Builder(
-                builder: (BuildContext context) { // need Builder for context
+                builder: (BuildContext context) {
+                  // need Builder for context
                   return CustomScrollView(
                     // Remember scroll position when
                     // the tab view is not on the screen
@@ -105,12 +105,14 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                     slivers: <Widget>[
                       SliverOverlapInjector(
                         // This is the flip side of the SliverOverlapAbsorber above.
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context),
                       ),
                       SliverPadding(
                         padding: const EdgeInsets.all(12),
                         sliver: SliverList(
-                          delegate: SliverChildListDelegate(_buildContentList(name)),
+                          delegate:
+                              SliverChildListDelegate(_buildContentList(name)),
                         ),
                       ),
                     ],
@@ -127,27 +129,26 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   List<Widget> _buildContentList(String key) {
     // Loading
     if (_isLoading)
-      return <Widget> [ Padding(
-          padding: EdgeInsets.only(top: 32),
-          child: Center(child: new CircularProgressIndicator())
-      )];
+      return <Widget>[
+        Padding(
+            padding: EdgeInsets.only(top: 32),
+            child: Center(child: new CircularProgressIndicator()))
+      ];
     // Private
     else if (_profIsPrivate) {
-      return <Widget>[ Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
+      return <Widget>[
+        Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Padding(
               padding: EdgeInsets.only(top: 32),
-              child: Icon(Icons.lock, size: 48,)
-            ),
-            Padding(
-                padding: EdgeInsets.all(8),
-                child: Text('Private Profile',
-                    style: TextStyle(color: Theme
-                        .of(context)
-                        .hintColor))
-            )
-          ])
+              child: Icon(
+                Icons.lock,
+                size: 48,
+              )),
+          Padding(
+              padding: EdgeInsets.all(8),
+              child: Text('Private Profile',
+                  style: TextStyle(color: Theme.of(context).hintColor)))
+        ])
       ];
     } else {
       if (key == _tabs[1])
@@ -160,15 +161,14 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   }
 
   List<Widget> _overviewList() {
-    return  <Widget>[
-          _buildSrRow(),
+    return <Widget>[
+      _buildSrRow(),
       Card(
           margin: EdgeInsets.all(12),
           child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                
                 Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,44 +177,50 @@ class PlayerDetailState extends State<PlayerDetailPage> {
                       _buildItem(player.gamesWon.toString(), 'Games Won'),
                       _buildItem(player.endorsement.toString(), 'Endorsement')
                     ]),
-                
               ])),
-          Card(
-            margin: EdgeInsets.all(12),
-              child: Column(
-                  //mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-
-                    Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text('Quick Play')),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          _buildItem(_playerDetail.qpGamesPlayed.toString(), 'Games Played'),
-                          _buildItem(_playerDetail.qpGamesWon.toString(), 'Games Won'),
-                          _buildItem(_playerDetail.qpTimePlayed.toString(), 'Time Played')
+      Card(
+          margin: EdgeInsets.all(12),
+          child: Column(
+              //mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.only(top: 12, left: 12),
+                    child: Text('Quick Play')),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      _buildItem(_playerDetail.qpGamesPlayed.toString(),
+                          'Games Played'),
+                      _buildItem(
+                          _playerDetail.qpGamesWon.toString(), 'Games Won'),
+                      _buildItem(
+                          _playerDetail.qpTimePlayed.toString(), 'Time Played')
                     ]),
-
-                    Padding(padding:EdgeInsets.only(top: 12, left: 12),child: Text('Competitive')),
-                    Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          _buildItem(_playerDetail.compWinRate.toString()+'%', 'Win Rate'),
-                          _buildItem(_playerDetail.compGamesPlayed.toString(), 'Games Played'),
-                          _buildItem(_playerDetail.compGamesWon.toString(), 'Games Won'),
-
+                Padding(
+                    padding: EdgeInsets.only(top: 12, left: 12),
+                    child: Text('Competitive')),
+                Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      _buildItem(_playerDetail.compWinRate.toString() + '%',
+                          'Win Rate'),
+                      _buildItem(_playerDetail.compGamesPlayed.toString(),
+                          'Games Played'),
+                      _buildItem(
+                          _playerDetail.compGamesWon.toString(), 'Games Won'),
                     ]),
-                    Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          _buildItem(_playerDetail.compTimePlayed.toString(), 'Time Played')
-                        ]),
-
+                Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      _buildItem(_playerDetail.compTimePlayed.toString(),
+                          'Time Played')
+                    ]),
               ]))
-        ];
+    ];
   }
 
   List<Widget> _buildHeroList(List<OwHero> heroList) {
@@ -225,7 +231,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
     int maxHero = heroList[0].getDuration().inSeconds;
     for (OwHero hero in heroList) {
-      widgets.add(_buildHeroCard(hero, hero.getDuration().inSeconds/maxHero));
+      widgets.add(_buildHeroCard(hero, hero.getDuration().inSeconds / maxHero));
     }
     return widgets;
   }
@@ -266,50 +272,55 @@ class PlayerDetailState extends State<PlayerDetailPage> {
   }*/
 
   Widget _buildHeroCard(OwHero hero, double percent) {
-    return InkWell(
-        onTap: () {
-          Navigator.push(context, new MaterialPageRoute(
-              builder: (context) => HeroDetailPage(hero: hero, battletag: player.name, platform: player.platform)));
-          },
-        child: Card(
-            clipBehavior: Clip.antiAlias,
-            margin: EdgeInsets.all(6),
-            child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.network(hero.getIconUrl(), height: 64,),
-                  Expanded(child:
-                  Column(
-                      children: [
-                        Padding(
-                            padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text(hero.fixName()), Text(hero.fixTime())]
-                            )
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(left: 8, right: 8),
-                            child: LinearProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(hero.color),
-                                backgroundColor: Theme.of(context).splashColor,
-                                value: percent
-                            )
-                        )
-                      ]
-                  ))
-                ])
-        )
-    );
+    return Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.all(6),
+        child: InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) => HeroDetailPage(
+                          hero: hero,
+                          battletag: player.name,
+                          platform: player.platform)));
+            },
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Image.network(
+                hero.getIconUrl(),
+                height: 64,
+              ),
+              Expanded(
+                  child: Column(children: [
+                Padding(
+                    padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(hero.fixName()),
+                          Text(hero.fixTime())
+                        ])),
+                Padding(
+                    padding: EdgeInsets.only(left: 8, right: 8),
+                    child: LinearProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(hero.color),
+                        backgroundColor: Theme.of(context).splashColor,
+                        value: percent))
+              ]))
+            ])));
   }
 
   Widget _buildItem(String title, String subtitle) {
     return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
           Padding(
               padding: EdgeInsets.only(left: 12, right: 12, top: 12),
-              child: Text(title, style: Theme.of(context).textTheme.headline6, textScaleFactor: 0.9,)),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.headline6,
+                textScaleFactor: 0.9,
+              )),
           Padding(
               padding: EdgeInsets.only(left: 12, right: 12, bottom: 12, top: 4),
               child: Text(subtitle,
@@ -331,8 +342,9 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
     return Padding(
         padding: EdgeInsets.only(top: 12, bottom: 24),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: ratings)
-    );
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: ratings));
   }
 
   Widget _buildSR(int rating, String iconUrl, String role) {
@@ -353,9 +365,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     ]);
   }
 
-
   void _promptWeb() {
-
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -440,7 +450,6 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     }
   }
 
-
   Future<void> _fetchData(Player player) async {
     String battletag = player.name;
     String platform = player.platform;
@@ -451,12 +460,14 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
     try {
       String url;
-      url = "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/complete";
+      url =
+          "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/complete";
       var fetchedFile = await CustomCacheManager().getSingleFile(url);
 
       // Get hero colors from CSS
       var client = Client();
-      Response colorResponse = await client.get('https://static.playoverwatch.com/app-53478582a8.css');
+      Response colorResponse = await client
+          .get('https://static.playoverwatch.com/app-53478582a8.css');
 
       if (fetchedFile != null) {
         var map = json.decode(await fetchedFile.readAsString());
@@ -472,13 +483,14 @@ class PlayerDetailState extends State<PlayerDetailPage> {
           // Public Profile
 
           _playerDetail = new PlayerDetail(
-            compGamesPlayed: map['competitiveStats']['games']['played'],
-            compGamesWon: map['competitiveStats']['games']['won'],
-            compTimePlayed: map['competitiveStats']['careerStats']['allHeroes']['game']['timePlayed'],
-            qpGamesPlayed: map['quickPlayStats']['games']['played'],
-            qpGamesWon: map['quickPlayStats']['games']['won'],
-            qpTimePlayed: map['quickPlayStats']['careerStats']['allHeroes']['game']['timePlayed']
-          );
+              compGamesPlayed: map['competitiveStats']['games']['played'],
+              compGamesWon: map['competitiveStats']['games']['won'],
+              compTimePlayed: map['competitiveStats']['careerStats']
+                  ['allHeroes']['game']['timePlayed'],
+              qpGamesPlayed: map['quickPlayStats']['games']['played'],
+              qpGamesWon: map['quickPlayStats']['games']['won'],
+              qpTimePlayed: map['quickPlayStats']['careerStats']['allHeroes']
+                  ['game']['timePlayed']);
 
           if (map['quickPlayStats']['topHeroes'] != null) {
             map['quickPlayStats']['topHeroes'].forEach((key, value) {
@@ -518,7 +530,8 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     } catch (e) {
       debugPrint(e.toString());
       if (context != null)
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text('Network Error')));
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Network Error')));
     }
 
     if (context != null) {
@@ -527,7 +540,6 @@ class PlayerDetailState extends State<PlayerDetailPage> {
         _profIsPrivate = true;
       });
     }
-
   }
 }
 
@@ -547,8 +559,8 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new Container(
-      child: AppBar(flexibleSpace: _tabBar, automaticallyImplyLeading: false)
-    );
+        child:
+            AppBar(flexibleSpace: _tabBar, automaticallyImplyLeading: false));
   }
 
   @override
@@ -558,7 +570,6 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class CustomCacheManager extends BaseCacheManager {
-
   static const key = "playerDetailCache";
 
   static CustomCacheManager _instance;
@@ -570,14 +581,13 @@ class CustomCacheManager extends BaseCacheManager {
     return _instance;
   }
 
-  CustomCacheManager._() : super(key,
-      maxAgeCacheObject: Duration(minutes: 10),
-      maxNrOfCacheObjects: 20);
+  CustomCacheManager._()
+      : super(key,
+            maxAgeCacheObject: Duration(minutes: 10), maxNrOfCacheObjects: 20);
 
   @override
   Future<String> getFilePath() async {
     var directory = await getTemporaryDirectory();
     return path.join(directory.path, key);
   }
-
 }
