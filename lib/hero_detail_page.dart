@@ -32,7 +32,8 @@ class HeroDetailState extends State<HeroDetailPage> {
 
   BuildContext _scaffoldContext;
 
-  Map<String, dynamic> _statList = {};
+  //Map<String, dynamic> _statList = {};
+  Map<String, dynamic> _heroStats = {};
 
   HeroDetailState(
       {Key key,
@@ -55,10 +56,10 @@ class HeroDetailState extends State<HeroDetailPage> {
                 style: TextStyle(fontFamily: 'GoogleSans'))),
         body: new Builder(builder: (BuildContext context) {
           return ListView.builder(
-              itemCount: _statList.length,
+              itemCount: _heroStats.length,
               itemBuilder: (context, index) {
-                return _buildItem(_statList.keys.elementAt(index),
-                    _statList.values.elementAt(index).toString());
+                return _buildCategory(_heroStats.keys.elementAt(index),
+                    _heroStats.values.elementAt(index));
               });
         }));
   }
@@ -70,6 +71,25 @@ class HeroDetailState extends State<HeroDetailPage> {
     );
   }
 
+  Widget _buildCategory(String title, Map<String, dynamic> map) {
+    return ExpansionTile(
+      key: PageStorageKey<String>(title),
+      title: Text(title),
+      children: _buildItemList(map)
+    );
+  }
+
+  List<Widget> _buildItemList(Map<String, dynamic> map) {
+    List<Widget> list = [];
+    if (map != null) {
+      map.forEach((key, value) {
+        if (value != null)
+          list.add(_buildItem(key, value.toString()));
+      });
+    }
+    return list;
+  }
+
   Future _fetchData() async {
     try {
       String url =
@@ -79,17 +99,17 @@ class HeroDetailState extends State<HeroDetailPage> {
       if (fetchedFile != null) {
         var map = json.decode(await fetchedFile.readAsString());
 
-        Map<String, dynamic> heroStats;
+        //Map<String, dynamic> heroStats;
 
         if (hero.isComp) {
-          heroStats = map['competitiveStats']['careerStats'][hero.name];
+          _heroStats = map['competitiveStats']['careerStats'][hero.name];
         } else {
-          heroStats = map['quickPlayStats']['careerStats'][hero.name];
+          _heroStats = map['quickPlayStats']['careerStats'][hero.name];
         }
 
-        heroStats.forEach((key, value) {
+        /*heroStats.forEach((key, value) {
           if (value != null) _statList.addAll(value);
-        });
+        });*/
       } else {
         if (context != null)
           Scaffold.of(_scaffoldContext)
