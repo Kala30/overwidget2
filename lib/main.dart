@@ -159,9 +159,14 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
 
   void setNavigationTheme() {
     if (isDarkTheme) {
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          statusBarColor: Colors.black,
+          systemNavigationBarColor: Colors.black,
+          systemNavigationBarIconBrightness: Brightness.light
+      ));
     } else {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          statusBarColor: Colors.grey[200],
           systemNavigationBarColor: Colors.grey[200],
           systemNavigationBarIconBrightness: Brightness.dark));
     }

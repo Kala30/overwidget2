@@ -11,6 +11,6 @@ public class MainActivity extends FlutterActivity {
     GeneratedPluginRegistrant.registerWith(this);
 
     //getWindow().setStatusBarColor(0x10000000);
-    getWindow().setStatusBarColor(0x00000000);
+    //getWindow().setStatusBarColor(0x00000000);
   }
 }
