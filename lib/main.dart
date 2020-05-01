@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ads/ads.dart';
 
 import 'player_page.dart';
 import 'news_page.dart';
@@ -32,6 +33,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
   int _currentIndex = 0;
   List<Widget> _children = [];
   BuildContext scaffoldContext;
+  Ads _ads;
 
   @override
   void initState() {
@@ -40,12 +42,15 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
+    _ads = Ads('ca-app-pub-2622368960038346~7194445923', testing: true);
+    _ads.showBannerAd();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+    _ads.dispose();
   }
 
   @override
@@ -117,7 +122,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
         children: _children,
       ),
       bottomNavigationBar: new Builder(builder: (BuildContext context) {
-        return BottomNavigationBar(
+        return Padding(
+          padding: EdgeInsets.only(bottom: 60),
+            child: BottomNavigationBar(
           onTap: onTabTapped,
           currentIndex: _currentIndex,
           items: [
@@ -136,6 +143,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
           ],
           selectedItemColor: Theme.of(context).accentColor,
           backgroundColor: Theme.of(context).cardColor,
+        )
         );
       }),
     );
