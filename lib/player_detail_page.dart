@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import 'dart:convert';
 import 'package:http/http.dart';
 
+import 'main.dart';
 import 'player.dart';
 
 class PlayerDetailPage extends StatefulWidget {
@@ -43,7 +44,9 @@ class PlayerDetailState extends State<PlayerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return Padding(
+      padding: EdgeInsets.only(bottom: getMargin(context)),
+        child: DefaultTabController(
       length: _tabs.length, // This is the number of tabs.
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -123,7 +126,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
           }).toList(),
         ),
       ),
-    );
+    ));
   }
 
   List<Widget> _buildContentList(String key) {

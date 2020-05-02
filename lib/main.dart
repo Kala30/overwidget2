@@ -22,6 +22,22 @@ class MainApp extends StatelessWidget {
   }
 }
 
+double getMargin(BuildContext context){
+  if (adsEnabled) {
+    double margin;
+    double height = MediaQuery.of(context).size.height;
+    if (height <= 400) {
+      margin = 37;
+    } else if (height >= 400 && height < 720) {
+      margin = 50;
+    } else if (height >= 720) {
+      margin = 55;
+    }
+    return margin;
+  } else
+    return 0;
+}
+
 class Home extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -90,7 +106,6 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-
     return new MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'OverWidget',
@@ -115,22 +130,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
                 foregroundColor: Colors.grey[900]
               ),
         ),
-        home: buildScaffold()
+        home: Builder(builder: (BuildContext context) {
+          return buildScaffold(context);
+        })
     );
   }
 
 
-  Widget buildScaffold() {
-
+  Widget buildScaffold(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _children,
       ),
       bottomNavigationBar: new Builder(builder: (BuildContext context) {
-        return Padding(
-            padding: adsEnabled ? EdgeInsets.only(bottom: 60) : EdgeInsets.zero,
-        child: BottomNavigationBar(
+        return Stack(
+          alignment: Alignment.bottomCenter,
+            children: [
+              Padding(
+                  padding: EdgeInsets.only(bottom: getMargin(context)),
+                  child: BottomNavigationBar(
           onTap: onTabTapped,
           currentIndex: _currentIndex,
           items: [
@@ -149,7 +168,12 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
           ],
           selectedItemColor: Theme.of(context).accentColor,
           backgroundColor: Theme.of(context).cardColor,
-        ));
+        )),
+          Container(
+            color: Theme.of(context).cardColor,
+            height: getMargin(context)
+          )
+        ]);
       }),
     );
   }
