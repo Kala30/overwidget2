@@ -130,7 +130,7 @@ class NewsPageState extends State<NewsPage> {
 
   Widget _buildFeaturedList() {
     return SizedBox(
-      height: 280,
+      height: 260,
       child: ListView.builder(
           key: PageStorageKey<String>('featuredList'),
           scrollDirection: Axis.horizontal,
@@ -155,7 +155,7 @@ class NewsPageState extends State<NewsPage> {
                     child: Ink.image(image: NetworkImage(news.imgUrl), height: 180, fit: BoxFit.cover)
                 ),
                 ListTile(
-                    title: Text(news.title/*, style: TextStyle(fontSize: 18)*/),
+                    title: Text(news.title, style: TextStyle(fontSize: 16)),
                     subtitle: Padding(
                         padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                         child: Column(
@@ -186,7 +186,7 @@ class NewsPageState extends State<NewsPage> {
                     child: Ink.image(image: NetworkImage(news.imgUrl), height: 160, fit: BoxFit.cover)
                 ),
                 ListTile(
-                    title: Text(news.title, style: TextStyle(fontSize: 14))
+                    title: Text(news.title, style: TextStyle(fontSize: 16))
                 )
               ],
             )

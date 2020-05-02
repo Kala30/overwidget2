@@ -164,7 +164,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
     return <Widget>[
       _buildSrRow(),
       Card(
-          margin: EdgeInsets.all(12),
+          margin: EdgeInsets.all(0),
           child: Padding(
             padding: EdgeInsets.all(8),
               child: Column(
@@ -183,7 +183,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
           )
       ),
       Card(
-          margin: EdgeInsets.all(12),
+          margin: EdgeInsets.only(top: 16),
           child: Padding(
             padding: EdgeInsets.all(8),
             child: Column(

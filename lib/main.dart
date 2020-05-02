@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,10 +13,12 @@ void main() {
     runApp(MainApp());
 }
 
+bool adsEnabled = Platform.isIOS;
+
 class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Home();
+    return Home();
   }
 }
 
@@ -42,8 +46,10 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-    _ads = Ads('ca-app-pub-2622368960038346~7194445923', testing: true);
-    _ads.showBannerAd();
+    if (adsEnabled) {
+      _ads = Ads('ca-app-pub-2622368960038346~7194445923', testing: true);
+      _ads.showBannerAd();
+    }
   }
 
   @override
@@ -123,8 +129,8 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: new Builder(builder: (BuildContext context) {
         return Padding(
-          padding: EdgeInsets.only(bottom: 60),
-            child: BottomNavigationBar(
+            padding: adsEnabled ? EdgeInsets.only(bottom: 60) : EdgeInsets.zero,
+        child: BottomNavigationBar(
           onTap: onTabTapped,
           currentIndex: _currentIndex,
           items: [
@@ -143,8 +149,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
           ],
           selectedItemColor: Theme.of(context).accentColor,
           backgroundColor: Theme.of(context).cardColor,
-        )
-        );
+        ));
       }),
     );
   }
