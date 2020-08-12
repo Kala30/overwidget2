@@ -156,16 +156,7 @@ class NewsPageState extends State<NewsPage> {
                 ),
                 ListTile(
                     title: Text(news.title, style: TextStyle(fontSize: 16)),
-                    subtitle: Padding(
-                        padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget> [
-                              Text(news.description/*, style: TextStyle(fontSize: 16)*/),
-                              Padding(child: Text(news.date), padding: EdgeInsets.only(top: 8))
-                            ]
-                        )
-                    )
+                    subtitle: Text(news.date)
                 )
               ],
             )

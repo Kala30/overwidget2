@@ -1,10 +1,9 @@
 import 'dart:io';
 
+//import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ads/ads.dart';
-
 import 'player_page.dart';
 import 'news_page.dart';
 import 'patch_page.dart';
@@ -13,7 +12,7 @@ void main() {
     runApp(MainApp());
 }
 
-bool adsEnabled = Platform.isIOS;
+bool adsEnabled = false /*Platform.isIOS*/;
 
 class MainApp extends StatelessWidget {
   @override
@@ -53,7 +52,20 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
   int _currentIndex = 0;
   List<Widget> _children = [];
   BuildContext scaffoldContext;
-  Ads _ads;
+  //Ads _ads;
+  //BannerAd _bannerAd;
+
+  /*BannerAd _buildBannerAd() {
+    return BannerAd(
+      adUnitId: BannerAd.testAdUnitId,
+      size: AdSize.fullBanner,
+      listener: (MobileAdEvent event) {
+        if (event ==MobileAdEvent.loaded) {
+          _bannerAd..show();
+        }
+      }
+    );
+  }*/
 
   @override
   void initState() {
@@ -62,17 +74,20 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-    if (adsEnabled) {
+    /*if (adsEnabled) {
       _ads = Ads('ca-app-pub-2622368960038346~7194445923', testing: true);
       _ads.showBannerAd();
-    }
+      _bannerAd = _buildBannerAd()..load();
+    }*/
+
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    //_bannerAd.dispose();
     super.dispose();
-    _ads.dispose();
+    //_ads.dispose();
   }
 
   @override

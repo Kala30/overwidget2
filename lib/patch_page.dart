@@ -11,6 +11,7 @@ class Patch {
   String url;
   String date;
   String description;
+  bool isFeatured = false;
 }
 
 class PatchPage extends StatefulWidget {
@@ -99,12 +100,15 @@ class PatchPageState extends State<PatchPage> {
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
         child: _patchList.length > 0 ? ListView.builder(
-            itemCount: _patchList.length + 1,
+            itemCount: _patchList.length,
             itemBuilder: (context, index) {
-              if (index == 0) return _buildFeatured(_patchList[0]);
-              return _buildItem(_patchList[index - 1]);
+              return _patchList[index].isFeatured
+                  ? _buildFeatured(_patchList[index])
+                  : _buildItem(_patchList[index]);
             })
-            : Center(child: Icon(Icons.error_outline, size: 48))
+            : Center(child: Column(children: [
+                  Icon(Icons.error_outline, size: 48)
+            ]))
     );
   }
 
@@ -126,18 +130,19 @@ class PatchPageState extends State<PatchPage> {
                 Padding(
                     padding: EdgeInsets.all(16),
                     child: Align(
-                        child: Text('Latest', style: Theme.of(context).textTheme.headline5),
+                        child: Text(patch.title,
+                            style: Theme.of(context).textTheme.headline2.apply(fontSizeFactor: 0.35)),
                         alignment: Alignment.centerLeft
                     )
                 ),
                 ListTile(
-                    title: Text(patch.title),
+                    title: Text(patch.description),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Padding(
                             padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                            child: Text(patch.description)),
+                            child: Text(patch.date)),
                         Align(
                             alignment: Alignment.centerRight,
                             child: FlatButton(
@@ -166,28 +171,31 @@ class PatchPageState extends State<PatchPage> {
   Future _fetchData() async {
     try {
       var client = Client();
-      Response response =
-          await client.get('https://playoverwatch.com/news/patch-notes/pc');
 
-      var document = parse(response.body);
-      List<dom.Element> patches = document.querySelectorAll(
-          'div.PatchNotesSideNav > ul > li.PatchNotesSideNav-listItem');
+      List<Response> responses = [];
+      responses.add( await client.get(
+          'https://playoverwatch.com/news/patch-notes/live'));
+      responses.add( await client.get(
+          'https://playoverwatch.com/news/patch-notes/ptr'));
+      responses.add( await client.get(
+          'https://playoverwatch.com/news/patch-notes/experimental'));
 
-      for (var item in patches) {
+      for (var response in responses) {
+        var document = parse(response.body);
+        dom.Element body = document.querySelector('.PatchNotes-body');
+
         Patch patch = new Patch()
-          ..title = item.querySelector('h3').text
-          ..url = 'https://playoverwatch.com/news/patch-notes/pc' +
-              item.querySelector('a').attributes['href']
-          ..date = item.querySelector('p').text;
+          ..title = document.querySelector('.PatchNotesTooltip-title').text
+          ..description = body.querySelector('.PatchNotes-patchTitle').text
+          ..url = response.request.url.toString()
+          ..date = body.querySelector('.PatchNotes-date').text
+          ..isFeatured = true;
 
         _patchList.add(patch);
       }
 
-      // Featured
-      dom.Element featured =
-          document.querySelector('.patch-notes-body > .patch-notes-patch');
-      _patchList[0].description = featured.querySelector('h2').text;
     } catch (e) {
+      debugPrint(e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Error fetching news')));
     }
