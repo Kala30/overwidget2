@@ -27,6 +27,7 @@ class PlayerPageState extends State<PlayerPage> {
   List<Player> _playerList = [];
 
   bool _isBusy = true;
+  bool _initFetch = true;
   int _sortBy = 0;
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -63,13 +64,14 @@ class PlayerPageState extends State<PlayerPage> {
       setState(() {
         _isBusy = false;
       });
+      _initFetch = false;
 
     } catch (e) {
       debugPrint('_initList(): ' + e.toString());
     }
   }
 
-  Future<void> _refreshList() async {
+  Future _refreshList() async {
 
     setState(() {
       _isBusy = true;
@@ -431,6 +433,9 @@ class PlayerPageState extends State<PlayerPage> {
       String url;
       url =
           "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/profile";
+
+      if (!_initFetch)
+        CustomCacheManager().emptyCache();
 
       var fetchedFile = await CustomCacheManager().getSingleFile(url);
 
