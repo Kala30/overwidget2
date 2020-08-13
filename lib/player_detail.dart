@@ -23,8 +23,9 @@ class PlayerDetail {
     this.qpGamesPlayed,
     this.qpGamesWon,
     this.qpTimePlayed}) {
-
-    compWinRate = (compGamesWon / compGamesPlayed * 100).round();
+    if (compGamesPlayed != 0)
+      compWinRate = (compGamesWon / compGamesPlayed * 100).round();
+    else compWinRate = 0;
   }
 }
 

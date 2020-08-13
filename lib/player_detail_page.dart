@@ -434,7 +434,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
       _isLoading = true;
     });
 
-    try {
+    //try {
       String url;
       url =
           "https://ow-api.com/v2/stats/$platform/${battletag.replaceAll('#', '-')}/complete";
@@ -503,12 +503,12 @@ class PlayerDetailState extends State<PlayerDetailPage> {
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Player not found')));
       }
-    } catch (e) {
+    /*} catch (e) {
       debugPrint("PlayerDetailPage: " + e.toString());
       if (context != null)
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Network Error')));
-    }
+    }*/
 
     if (context != null) {
       setState(() {
