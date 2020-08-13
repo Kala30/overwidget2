@@ -1,5 +1,3 @@
-import 'dart:io';
-
 //import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'player_page.dart';
 import 'news_page.dart';
 import 'patch_page.dart';
+import 'credits_page.dart';
 
 void main() {
     runApp(MainApp());
@@ -47,11 +46,15 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> with WidgetsBindingObserver {
 
+  static const String DARK_THEME = 'darkTheme';
+  static const String CREDITS = 'credits';
+
   bool isDarkTheme = false;
   SharedPreferences prefs;
   int _currentIndex = 0;
   List<Widget> _children = [];
   BuildContext scaffoldContext;
+
   //Ads _ads;
   //BannerAd _bannerAd;
 
@@ -92,7 +95,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed){
+    if (state == AppLifecycleState.resumed) {
       setNavigationTheme();
     }
   }
@@ -113,10 +116,9 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
       setNavigationTheme();
     });
 
-    _children.add(NewsPage(setDarkTheme));
-    _children.add(PlayerPage(setDarkTheme));
-    _children.add(PatchPage(setDarkTheme));
-
+    _children.add(NewsPage(buildPopupMenu()));
+    _children.add(PlayerPage(buildPopupMenu()));
+    _children.add(PatchPage(buildPopupMenu()));
   }
 
   @override
@@ -126,24 +128,26 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
         title: 'OverWidget',
         theme: isDarkTheme
             ? ThemeData(
-              brightness: Brightness.dark,
-              primaryColor: Color(0xFF1F1F1F),
-              accentColor: Colors.redAccent,
-              scaffoldBackgroundColor: Color(0xFF121212),
-              cardColor: Color(0xFF1D1D1D),
-              floatingActionButtonTheme: FloatingActionButtonThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Color(0xFF1F1F1F),
+            accentColor: Colors.redAccent,
+            scaffoldBackgroundColor: Color(0xFF121212),
+            cardColor: Color(0xFF1D1D1D),
+            floatingActionButtonTheme: FloatingActionButtonThemeData(
                 backgroundColor: Colors.redAccent,
                 foregroundColor: Colors.grey[100]
-              ), navigationRailTheme: NavigationRailThemeData(backgroundColor: Color(0xFF1F1F1F))
-            )
+            ),
+            navigationRailTheme: NavigationRailThemeData(
+                backgroundColor: Color(0xFF1F1F1F))
+        )
             : ThemeData(
-              primaryColor: Colors.white,
-              primaryColorDark: Colors.grey[300],
-              accentColor: Colors.orangeAccent,
-              floatingActionButtonTheme: FloatingActionButtonThemeData(
-                backgroundColor: Colors.orangeAccent,
-                foregroundColor: Colors.grey[900]
-              ),
+          primaryColor: Colors.white,
+          primaryColorDark: Colors.grey[300],
+          accentColor: Colors.orangeAccent,
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+              backgroundColor: Colors.orangeAccent,
+              foregroundColor: Colors.grey[900]
+          ),
         ),
         home: Builder(builder: (BuildContext context) {
           return buildScaffold(context);
@@ -153,6 +157,7 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
 
 
   Widget buildScaffold(BuildContext context) {
+    scaffoldContext = context;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -160,35 +165,41 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: new Builder(builder: (BuildContext context) {
         return Stack(
-          alignment: Alignment.bottomCenter,
+            alignment: Alignment.bottomCenter,
             children: [
               Padding(
                   padding: EdgeInsets.only(bottom: getMargin(context)),
                   child: BottomNavigationBar(
-          onTap: onTabTapped,
-          currentIndex: _currentIndex,
-          items: [
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.home),
-              title: new Text('Home'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.account_circle),
-              title: new Text('Stats'),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.new_releases),
-                title: Text('Patch Notes')
-            )
-          ],
-          selectedItemColor: Theme.of(context).accentColor,
-          backgroundColor: Theme.of(context).cardColor,
-        )),
-          Container(
-            color: Theme.of(context).cardColor,
-            height: getMargin(context)
-          )
-        ]);
+                    onTap: onTabTapped,
+                    currentIndex: _currentIndex,
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: new Icon(Icons.home),
+                        title: new Text('Home'),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: new Icon(Icons.account_circle),
+                        title: new Text('Stats'),
+                      ),
+                      BottomNavigationBarItem(
+                          icon: Icon(Icons.new_releases),
+                          title: Text('Patch Notes')
+                      )
+                    ],
+                    selectedItemColor: Theme
+                        .of(context)
+                        .accentColor,
+                    backgroundColor: Theme
+                        .of(context)
+                        .cardColor,
+                  )),
+              Container(
+                  color: Theme
+                      .of(context)
+                      .cardColor,
+                  height: getMargin(context)
+              )
+            ]);
       }),
     );
   }
@@ -199,12 +210,52 @@ class HomeState extends State<Home> with WidgetsBindingObserver {
     });
   }
 
+  PopupMenuButton buildPopupMenu() {
+
+    return PopupMenuButton<String>(
+      onSelected: (String result) {
+        switch (result) {
+          case DARK_THEME:
+            setDarkTheme(!prefs.getBool(DARK_THEME));
+            break;
+          case CREDITS:
+            Navigator.push(scaffoldContext,
+              MaterialPageRoute(builder: (scaffoldContext) => CreditsPage())
+            );
+            break;
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        PopupMenuItem(
+          value: DARK_THEME,
+          child: IgnorePointer(
+              /*child: SwitchListTile(
+                  dense: false,
+                  title: Text('Dark Theme'),
+                  value: prefs.getBool(DARK_THEME),
+                  onChanged: (value) {},
+                  activeColor: Theme.of(context).accentColor)*/
+              child: Row(children: [
+                Expanded(child: Text('Dark Theme')),
+                Switch(value: prefs.getBool(DARK_THEME),
+                    onChanged: (value) {},
+                    activeColor: Theme.of(context).accentColor)
+              ])
+          )
+        ),
+        PopupMenuItem(
+          value: CREDITS,
+          child: Text('Credits')
+        )
+      ]
+    );
+  }
 
   void setDarkTheme(bool value) {
     setState(() {
       isDarkTheme = value;
     });
-    prefs.setBool('darkTheme', value);
+    prefs.setBool(DARK_THEME, value);
 
     setNavigationTheme();
   }

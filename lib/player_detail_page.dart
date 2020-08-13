@@ -443,7 +443,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
       // Get hero colors from CSS
       var client = Client();
       Response colorResponse = await client
-          .get('https://static.playoverwatch.com/app-53478582a8.css');
+          .get('https://static.playoverwatch.com/app-cabc95b21a.css');
 
       if (fetchedFile != null) {
         var map = json.decode(await fetchedFile.readAsString());
@@ -504,7 +504,7 @@ class PlayerDetailState extends State<PlayerDetailPage> {
             .showSnackBar(SnackBar(content: Text('Player not found')));
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("PlayerDetailPage: " + e.toString());
       if (context != null)
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Network Error')));

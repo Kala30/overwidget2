@@ -110,7 +110,7 @@ class OwHero {
       color =  hexToColor(match.group(1));
 
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("setColor: " + e.toString());
       debugPrint(name);
       color = Colors.grey;
     }

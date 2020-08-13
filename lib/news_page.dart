@@ -19,8 +19,8 @@ class News {
 }
 
 class NewsPage extends StatefulWidget {
-  final Function setDarkTheme;
-  NewsPage(this.setDarkTheme);
+  final PopupMenuButton popupMenu;
+  NewsPage(this.popupMenu);
   @override
   createState() => new NewsPageState();
 }
@@ -72,29 +72,7 @@ class NewsPageState extends State<NewsPage> {
     return new Scaffold(
         appBar: new AppBar(
             title: new Text('OverWidget', style: TextStyle(fontFamily: 'GoogleSans', color: Theme.of(context).accentColor) ),
-            actions: <Widget>[
-              PopupMenuButton<String>(
-                onSelected: (String result) {
-                  switch (result) {
-                    case 'darkTheme':
-                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                      break;
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem(
-                      value: 'darkTheme',
-                      child: IgnorePointer(child: SwitchListTile(
-                          dense: true,
-                          title: Text("Dark Theme"),
-                          value: prefs.getBool('darkTheme'),
-                          onChanged: (value) {},
-                          activeColor: Theme.of(context).accentColor
-                      ))
-                  )
-                ],
-              )
-         ]
+            actions: <Widget>[widget.popupMenu]
         ),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;

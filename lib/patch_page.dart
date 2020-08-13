@@ -15,8 +15,8 @@ class Patch {
 }
 
 class PatchPage extends StatefulWidget {
-  final Function setDarkTheme;
-  PatchPage(this.setDarkTheme);
+  final PopupMenuButton popupMenu;
+  PatchPage(this.popupMenu);
   @override
   createState() => new PatchPageState();
 }
@@ -65,28 +65,8 @@ class PatchPageState extends State<PatchPage> {
                 style: TextStyle(
                     fontFamily: 'GoogleSans',
                     color: Theme.of(context).accentColor)),
-            actions: <Widget>[
-              PopupMenuButton<String>(
-                onSelected: (String result) {
-                  switch (result) {
-                    case 'darkTheme':
-                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                      break;
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem(
-                      value: 'darkTheme',
-                      child: IgnorePointer(
-                          child: SwitchListTile(
-                              dense: true,
-                              title: Text("Dark Theme"),
-                              value: prefs.getBool('darkTheme'),
-                              onChanged: (value) {},
-                              activeColor: Theme.of(context).accentColor)))
-                ],
-              )
-            ]),
+            actions: <Widget>[widget.popupMenu]
+        ),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
           return _isLoading
@@ -99,17 +79,24 @@ class PatchPageState extends State<PatchPage> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _refreshList,
-        child: _patchList.length > 0 ? ListView.builder(
-            itemCount: _patchList.length,
-            itemBuilder: (context, index) {
-              return _patchList[index].isFeatured
-                  ? _buildFeatured(_patchList[index])
-                  : _buildItem(_patchList[index]);
-            })
-            : Center(child: Column(children: [
-                  Icon(Icons.error_outline, size: 48)
-            ]))
-    );
+        child: _patchList.length > 0
+            ? ListView.builder(
+                itemCount: _patchList.length,
+                itemBuilder: (context, index) {
+                  return _patchList[index].isFeatured
+                      ? _buildFeatured(_patchList[index])
+                      : _buildItem(_patchList[index]);
+                })
+            : Center(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.error_outline, size: 48),
+                FlatButton(child: Text('RETRY'), textTheme: ButtonTextTheme.accent,
+                  onPressed: () => setState(() {
+                    _isLoading = true;
+                    _refreshList();
+                  })
+                )
+              ])));
   }
 
   Widget _buildItem(Patch patch) {
@@ -131,25 +118,26 @@ class PatchPageState extends State<PatchPage> {
                     padding: EdgeInsets.all(16),
                     child: Align(
                         child: Text(patch.title,
-                            style: Theme.of(context).textTheme.headline2.apply(fontSizeFactor: 0.35)),
-                        alignment: Alignment.centerLeft
-                    )
-                ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline2
+                                .apply(fontSizeFactor: 0.35)),
+                        alignment: Alignment.centerLeft)),
                 ListTile(
                     title: Text(patch.description),
                     subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                            child: Text(patch.date)),
-                        Align(
-                            alignment: Alignment.centerRight,
-                            child: FlatButton(
-                                child: new Text('MORE'),
-                                textTheme: ButtonTextTheme.accent,
-                                onPressed: () => _launchURL(patch.url)))
-                      ]))
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                              padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                              child: Text(patch.date)),
+                          Align(
+                              alignment: Alignment.centerRight,
+                              child: FlatButton(
+                                  child: new Text('MORE'),
+                                  textTheme: ButtonTextTheme.accent,
+                                  onPressed: () => _launchURL(patch.url)))
+                        ]))
               ],
             )));
   }
@@ -173,12 +161,12 @@ class PatchPageState extends State<PatchPage> {
       var client = Client();
 
       List<Response> responses = [];
-      responses.add( await client.get(
-          'https://playoverwatch.com/news/patch-notes/live'));
-      responses.add( await client.get(
-          'https://playoverwatch.com/news/patch-notes/ptr'));
-      responses.add( await client.get(
-          'https://playoverwatch.com/news/patch-notes/experimental'));
+      responses.add(
+          await client.get('https://playoverwatch.com/news/patch-notes/live'));
+      responses.add(
+          await client.get('https://playoverwatch.com/news/patch-notes/ptr'));
+      responses.add(await client
+          .get('https://playoverwatch.com/news/patch-notes/experimental'));
 
       for (var response in responses) {
         var document = parse(response.body);
@@ -193,7 +181,6 @@ class PatchPageState extends State<PatchPage> {
 
         _patchList.add(patch);
       }
-
     } catch (e) {
       debugPrint(e.toString());
       Scaffold.of(scaffoldContext)

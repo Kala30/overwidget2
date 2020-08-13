@@ -15,8 +15,8 @@ import 'package:transparent_image/transparent_image.dart';
 LocalStorage localStorage = new LocalStorage();
 
 class PlayerPage extends StatefulWidget {
-  final Function setDarkTheme;
-  PlayerPage(this.setDarkTheme);
+  final PopupMenuButton popupMenu;
+  PlayerPage(this.popupMenu);
   @override
   createState() => new PlayerPageState();
 }
@@ -98,26 +98,7 @@ class PlayerPageState extends State<PlayerPage> {
                     color: Theme.of(context).accentColor)),
             actions: <Widget>[
               IconButton(icon: Icon(Icons.sort), onPressed: _promptSortBy),
-              PopupMenuButton<String>(
-                onSelected: (String result) {
-                  switch (result) {
-                    case 'darkTheme':
-                      widget.setDarkTheme(!prefs.getBool('darkTheme'));
-                      break;
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem(
-                      value: 'darkTheme',
-                      child: IgnorePointer(
-                          child: SwitchListTile(
-                              dense: true,
-                              title: Text("Dark Theme"),
-                              value: prefs.getBool('darkTheme'),
-                              onChanged: (value) {},
-                              activeColor: Theme.of(context).accentColor)))
-                ],
-              )
+              widget.popupMenu
             ]),
         body: new Builder(builder: (BuildContext context) {
           scaffoldContext = context;
@@ -509,7 +490,7 @@ class PlayerPageState extends State<PlayerPage> {
             .showSnackBar(SnackBar(content: Text('Player not found')));
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("PlayerPage: " + e.toString());
       Scaffold.of(scaffoldContext)
           .showSnackBar(SnackBar(content: Text('Network Error')));
     }
