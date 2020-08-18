@@ -50,7 +50,7 @@ class PatchPageState extends State<PatchPage> {
 
   Future _refreshList() async {
     _patchList = [];
-    _fetchData();
+    await _fetchData();
   }
 
   @override

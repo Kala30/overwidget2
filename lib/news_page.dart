@@ -26,9 +26,14 @@ class NewsPage extends StatefulWidget {
 }
 
 class NewsPageState extends State<NewsPage> {
+
+  static const String NEWS_URL = 'https://playoverwatch.com/news';
+  static const String PATCH_URL = 'https://playoverwatch.com/news/patch-notes/live';
+
   BuildContext scaffoldContext;
   List<News> _newsList = [];
   List<News> _featuredList = [];
+  News _featuredPatch;
 
   bool _isLoading = true;
 
@@ -59,7 +64,7 @@ class NewsPageState extends State<NewsPage> {
   Future _refreshList() async {
     _newsList = [];
     _featuredList = [];
-    _fetchData();
+    await _fetchData();
   }
 
 
@@ -95,10 +100,11 @@ class NewsPageState extends State<NewsPage> {
               if (index == 0)
                 return _buildFeaturedList();
               else if (index == 1)
-                return Padding(
+                /*return Padding(
                     padding: EdgeInsets.only(left: 12),
                     child: Text('News', style: Theme.of(context).textTheme.headline5)
-                );
+                );*/
+                return _buildPatchItem(_featuredPatch);
               else
                 return _buildItem(_newsList[index-2]);
             }
@@ -121,7 +127,7 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Widget _buildItem(News news) {
-    return Card(
+    /**return Card(
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.all(12),
         child: InkWell(
@@ -139,6 +145,15 @@ class NewsPageState extends State<NewsPage> {
               ],
             )
         )
+    );*/
+    return ListTile(
+      onTap: () => _launchURL(news.url),
+      leading: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Image.network(news.imgUrl, height: 54, fit: BoxFit.cover)
+      ),
+      title: Text(news.title),
+      subtitle: Text(news.date)
     );
   }
 
@@ -151,16 +166,34 @@ class NewsPageState extends State<NewsPage> {
             child: Column(
               children: <Widget>[
                 Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 160, fit: BoxFit.cover)
+                    padding: EdgeInsets.only(bottom: 0),
+                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 155, fit: BoxFit.cover)
                 ),
                 ListTile(
-                    title: Text(news.title, style: TextStyle(fontSize: 16))
+                  title: Text(news.title, style: TextStyle(fontSize: 14)),
+                  subtitle: Text(news.date),
                 )
               ],
             )
         )
     ));
+  }
+
+  Widget _buildPatchItem(News news) {
+    return Card(
+      margin: EdgeInsets.all(12),
+      child: InkWell(
+        onTap: () => _launchURL(news.url),
+        child: ListTile(
+          title: Text(news.title),
+          subtitle: Text(news.date),
+          leading: Column(mainAxisAlignment: MainAxisAlignment.center,
+              children: [Icon(Icons.new_releases)]
+          ),
+          trailing: Icon(Icons.arrow_forward),
+        ),
+      ),
+    );
   }
 
 
@@ -180,10 +213,9 @@ class NewsPageState extends State<NewsPage> {
 
 
   Future _fetchData() async {
-
     try {
       var client = Client();
-      Response response = await client.get('https://playoverwatch.com/news');
+      Response response = await client.get(NEWS_URL);
 
       var document = parse(response.body);
 
@@ -197,7 +229,7 @@ class NewsPageState extends State<NewsPage> {
           ..url = 'https://playoverwatch.com' + blog.attributes['href']
           ..imgUrl = 'https:' + blog.querySelector('.Card-thumbnail').attributes['style'].replaceAll(RegExp(r'background-image: url\(|\)'), '')
           ..description = ''
-          ..date = '';
+          ..date = blog.querySelector('.Card-date').text;
 
         _featuredList.add(news);
       }
@@ -216,6 +248,17 @@ class NewsPageState extends State<NewsPage> {
 
         _newsList.add(news);
       }
+
+      // Patch Notes
+      Response patchResponse = await client.get(PATCH_URL);
+      var patchDoc = parse(patchResponse.body);
+      dom.Element body = patchDoc.querySelector('.PatchNotes-body');
+
+      _featuredPatch = new News()
+        ..title = patchDoc.querySelector('.PatchNotesTooltip-title').text
+        ..description = body.querySelector('.PatchNotes-patchTitle').text
+        ..url = patchResponse.request.url.toString()
+        ..date = body.querySelector('.PatchNotes-date').text;
 
     } catch (e) {
       debugPrint(e.toString());
