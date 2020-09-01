@@ -127,25 +127,6 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Widget _buildItem(News news) {
-    /**return Card(
-        clipBehavior: Clip.antiAlias,
-        margin: EdgeInsets.all(12),
-        child: InkWell(
-            onTap: () => _launchURL(news.url),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 180, fit: BoxFit.cover)
-                ),
-                ListTile(
-                    title: Text(news.title, style: TextStyle(fontSize: 16)),
-                    subtitle: Text(news.date)
-                )
-              ],
-            )
-        )
-    );*/
     return ListTile(
       onTap: () => _launchURL(news.url),
       leading: ClipRRect(
@@ -164,10 +145,10 @@ class NewsPageState extends State<NewsPage> {
         child: InkWell(
             onTap: () => _launchURL(news.url),
             child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Padding(
-                    padding: EdgeInsets.only(bottom: 0),
-                    child: Ink.image(image: NetworkImage(news.imgUrl), height: 155, fit: BoxFit.cover)
+                Expanded(
+                    child: Ink.image(image: NetworkImage(news.imgUrl), fit: BoxFit.cover)
                 ),
                 ListTile(
                   title: Text(news.title, style: TextStyle(fontSize: 14)),
