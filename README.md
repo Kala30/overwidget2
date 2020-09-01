@@ -1,8 +1,8 @@
-# Overwidget
+# OverWidget
 
 iOS and Android app for Overwatch player stats.
 
-Created with Flutter.
+[App Store](https://apps.apple.com/us/app/id1506700331)
 
 
 ![](img/mockups.png)
